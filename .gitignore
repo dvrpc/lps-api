@@ -1,2 +1,2 @@
 api/lib/secret.py
-api/lib/secret.pyc
+*.pyc
