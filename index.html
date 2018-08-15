@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <meta name='Viewport' content='width=device-width, initial-scale=1'>
+        <meta name='Title' content='DVRPC Station Shed Viewer'>
+        <meta name='Description' content='View results for a survey of cars at rail stations in the DVRPC region and gain and understanding of where railway commuters are coming from'>
+        <meta name='Keywords' content='station sheds, station, railway, commuters, railway commuters, urban planning, DVRPC'>
+        <meta name='Owner' content='webmaster@dvrpc.org'>
+        <meta name='Robots' content='index, follow'>
+        <meta name='Distribution' content='global'>
+        <!-- external files -->
+        <link rel='stylesheet' type='text/css' href='./css/index.css'>
+        <link rel='stylesheet' type='text/css' href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' />
+        <script type='text/javascript' src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
+        <script async type='text/javascript' src='./js/index.js'></script>
+    </head>
+
+    <body>
+        <nav>
+            <img src="./img/noGoodVeryBadLogo.png" />
+            <form id="main-form">
+                <select name='station'>
+                    <option value='Paoli'>Paoli</option>
+                    <option value='Lindenwold'>Lindenwold</option>
+                </select>
+
+                <select name='year'>
+                    <option value='2005'>2005</option>
+                    <option value='2002'>2002</option>
+                </select>
+
+                <input type='submit' value='Search'>
+            </form>
+        </nav>
+
+        <main role='main' id='map'></main>
+    </body>
+</html>
