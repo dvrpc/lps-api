@@ -36,15 +36,33 @@ fetch('http://localhost:8000/test')
     if(response.ok){
         response.json()
         .then(jawn=>{
+            form[0].addEventListener('change', e=>{
+                while(form[1].firstChild){
+                    form[1].removeChild(form[1].firstChild)
+                }
+                let station = e.target.value
+                jawn.forEach(feature=>{
+                    if(feature[station]){
+                        feature[station].forEach(year=>{
+                            let option = document.createElement('option')
+                            option.value = year
+                            option.innerText = year
+                            form[1].appendChild(option)
+                        })
+                    }
+                })
+            })
             jawn.forEach(station=>{
+                let k = Object.keys(station)[0].toString()
                 let option = document.createElement('option')
-                option.value = station.station
-                option.innerText = station.station
+                option.value = k
+                option.innerText = k
                 form[0].appendChild(option)
             })
         })
     }
 })
+
 form.onsubmit = e => {
     e.preventDefault()
 
@@ -61,34 +79,39 @@ form.onsubmit = e => {
             if (response.status == 200) {
                 response.json()
                     .then(jawn => {
+                        if (!jawn.length) alert('yo that aint right')
+                        else{
                         // build your arcgis query parameter while making your db call 
                         let fids = []
                         for (let k in jawn){fids.push(jawn[k].id)}
-                        // arcgis call
-                        fetch(
-                            `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`
-                        ).then(response => {
-                            if (response.ok) {
-                                response.json().then(hexBins => {
-                                    // bind count data to arcgis response
-                                    jawn.forEach(count=>{
-                                        let features = hexBins.features
-                                        for (let i in features){
-                                            if (features[i].properties.FID == count.id){
-                                                features[i].properties.count = count.count
+                            // arcgis call
+                            fetch(
+                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`, {
+                                    method: 'POST'
+                                }
+                            ).then(response => {
+                                if (response.ok) {
+                                    response.json().then(hexBins => {
+                                        // bind count data to arcgis response
+                                        jawn.forEach(count=>{
+                                            let features = hexBins.features
+                                            for (let i in features){
+                                                if (features[i].properties.FID == count.id){
+                                                    features[i].properties.count = count.count
+                                                }
                                             }
-                                        }
+                                        })
+                                        // throw some honeycombs on the map #saveTheBees
+                                        map.addSource('hexBins', {
+                                            type: 'geojson',
+                                            data: hexBins
+                                        })
+                    
+                                        map.addLayer(hex_layer('hexBins'))
                                     })
-                                    // throw some honeycombs on the map #saveTheBees
-                                    map.addSource('hexBins', {
-                                        type: 'geojson',
-                                        data: hexBins
-                                    })
-                
-                                    map.addLayer(hex_layer('hexBins'))
-                                })
-                            }
-                        }).catch(error => console.error(error))
+                                }
+                            }).catch(error => console.error(error))
+                        }
                     })
             }
         }).catch(error => console.error(error))
