@@ -12,7 +12,7 @@ const map = new mapboxgl.Map({
 map.fitBounds([[-76.09405517578125, 39.49211914385648], [-74.32525634765625, 40.614734298694216]]);
 
 
-// helper function to ???
+// helper function to dynamically calculate quantiles for classification
 Quartile = array =>{
     let quarValues = {
         '0.25': undefined,
@@ -23,43 +23,54 @@ Quartile = array =>{
     array.sort((a,b)=>{
         return a -b
     })
+    // fudge stuff so we're not multiplying by zero or making shitty quantiles for results that don't have a large range
     let position = parseInt((array.length/4),10)
     if (position == 0){
         let position = 2
     }
-
     let max = Math.max.apply(null, array)
-    // let min = Math.min.apply(null, array)
-    // let interval = (max - min)/4
     cnt = 1
+    // assign index position of quantile breakpoints
     for (q in quarValues){
         let index = position*cnt
         cnt == 4 ? quarValues[q] = max : quarValues[q] = array[index]
         cnt ++
     }
-    console.log(array)
     return quarValues
 }
 // helper function to create the hex layers
-hex_layer = (id, quartiles) => {
-    console.log({quartiles})
+hex_layer = (id, quartiles, infoArray) => {
+    // color schemes for each operator
+    const schemes =  {
+        'SEPTA': {
+            'Regional Rail & Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
+            'Commuter Rail': ["#c1e7ff", '#86b0cc', '#4c7c9b', '#004c6d'],
+            'Surface Trolley': ['#d1eac7', '#a7cd99', '#7db06d', '#529442'],
+            'Subway': ['#ffdbc2', '#ffbe8e', '#fca05a', '#f58221'],
+            'Subway/Elevated': ['#cae5ff', '#97c1ea', '#619fd6', '#067dc1'],
+        },
+        'DRPA': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b'],
+        'Amtrak': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d'],
+        'NJ Transit': {
+            'Commuter Rail': ['#e2e2e2','#f18541', '#b02c87', '#045099'],
+            'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
+        },
+        'PennDOT': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
+    }
+
     return {
         'id': id,
         'type': 'fill',
         'source': id,
         'paint': {
-            /* @TODO: create a schema for colors based on count & update the values of color (and opacity?) accordingly
-                    @DOUBLETODO: graduated color scheme based on range of counts returned from api response
-                        @TRIPLETODO: color schemes derive color from operator logos        
-            */
             'fill-color': {
                 property : 'count',
                 type: 'interval',
                 stops: [
-                    [0, '#8DE682'],
-                    [quartiles['0.25'], '#8DE682'],
-                    [quartiles['0.50'], '#00CAA2'],
-                    [quartiles['max'],  '#005B9C']
+                    [0, schemes[infoArray[0]][infoArray[1]][0]],
+                    [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][1]],
+                    [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][2]],
+                    [quartiles['max'],  schemes[infoArray[0]][infoArray[1]][3]]
                 ]
             },
             'fill-outline-color': '#fff'
@@ -69,7 +80,7 @@ hex_layer = (id, quartiles) => {
 
 // function to get station sheds hexagons on submit
 const form = document.querySelector('#main-form')
-
+let data = undefined
 // populate dropdowns with possible query values
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
 fetch('http://localhost:8000/test')
@@ -85,10 +96,11 @@ fetch('http://localhost:8000/test')
                         }
                         // get the new station value
                         let station = e.target.value
+                    
                         // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
                         jawn.forEach(feature => {
                             if (feature[station]) {
-                                feature[station].forEach(year => {
+                                feature[station]['years'].forEach(year => {
                                     let option = document.createElement('option')
                                     option.value = year
                                     option.innerText = year
@@ -99,12 +111,13 @@ fetch('http://localhost:8000/test')
                     })
                     // loop through stations and create a dropdown option for each one
                     jawn.forEach(station => {
-                        let k = Object.keys(station)[0].toString()
-                        let option = document.createElement('option')
+                        let k = Object.keys(station)[0].toString(),
+                            option = document.createElement('option')
                         option.value = k
                         option.innerText = k
                         form[0].appendChild(option)
                     })
+                return data = jawn
                 })
         }
     })
@@ -117,8 +130,19 @@ form.onsubmit = e => {
         map.removeLayer('hexBins')
         map.removeSource('hexBins')
     }
-    let station = e.target[0].value
-    let selectedYear = e.target[1].value
+    let station = e.target[0].value,
+        selectedYear = e.target[1].value
+    
+    // info to pass to hex_layer function (L186) to apply appropriate color scheme to results
+    let stationInfo = []
+    data.forEach(i=>{
+        if(i[station]){
+            stationInfo.push(i[station].operator)
+            let mode = i[station].mode
+             mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
+        }
+    })
+    
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
     fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
         .then(response => {
@@ -131,7 +155,7 @@ form.onsubmit = e => {
                             let fids = []
                             for (let k in jawn) { fids.push(jawn[k].id) }
                             // arcgis call
-                                // KNOWN BUG: Queries that return a lot of features receive a 404 error
+                                // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue)
                             fetch(
                                 `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`, {
                                     method: 'POST'
@@ -150,7 +174,7 @@ form.onsubmit = e => {
                                                 }
                                             }
                                         })
-                                        let quartiles = Quartile(range)
+                                        let quartiles = Quartile(range) // calculate classification break points
                                         // throw some honeycombs on the map #saveTheBees
                                         map.addSource('hexBins', {
                                             type: 'geojson',
@@ -158,7 +182,7 @@ form.onsubmit = e => {
                                         })
 
 
-                                        map.addLayer(hex_layer('hexBins', quartiles))
+                                        map.addLayer(hex_layer('hexBins', quartiles, stationInfo))
 
 
                                         // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
