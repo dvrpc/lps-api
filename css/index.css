@@ -1,0 +1,70 @@
+/*General layout*/
+body{
+    margin: 0;
+    overflow-x: hidden;
+    font-family: pt-serif,"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif
+}
+
+
+/*Navbar*/
+nav{
+    height: 15vh;
+    background: #2a2d34;
+}
+nav img{
+    height: 100%;
+    margin-left: 1%;
+    float: left;
+}
+form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+form p{
+    color: #fdfffc;
+}
+select{
+    margin: 0 1%;
+    text-align: center;
+    color: #333;
+}
+input[type="submit"]{
+    color: #fdfffc;
+    background: #2a2d34;
+    border-color: #bfc0c0;
+    margin-left: 1%;
+    border-radius: 2px;
+    transition: color 0.5s, background 0.5s, border-color 0.5s;
+    transition-timing-function: linear;
+}
+select, input[type="submit"]:hover{
+    cursor: pointer;
+}
+select, input[type="submit"]{
+    /*cool fancy trick I learned from Twitter on how to make fonts more responsive*/
+    font-size: calc(12px + 0.3vw);
+    padding: 5px 2%;
+}
+
+.station-input{
+    width: 10%;
+    text-align: left;
+}
+
+
+/*Map*/
+main{
+    height: 85vh;
+}
+
+/*Transitions*/
+input[type="submit"]:hover{
+    color: #333;
+    background: #bfc0c0;
+    border-color: #2a2d34;
+}
+
+
+/* @TODO: Media Queries*/
