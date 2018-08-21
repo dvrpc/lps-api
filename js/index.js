@@ -1,6 +1,5 @@
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
 
-// my baller custom map that shouldn't be used because its way too noisy but here it is anyways cause it's sick: 'mapbox://styles/mmolta/cjkvf4ev40swv2rmxqlfsiivx'
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
@@ -9,39 +8,66 @@ const map = new mapboxgl.Map({
     zoom: 12 // or whatever zoom you want
 });
 
-map.fitBounds([[-76.09405517578125, 39.49211914385648], [-74.32525634765625, 40.614734298694216]]);
+map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
 
-// helper function to dynamically calculate quantiles for classification
-Quartile = array =>{
+/* Quartile(range) -- rbeatty
+    @desc: Dynamically calculate quartile break values based on values in input array 
+    @params:
+        @range: 
+            - DATA TYPE: array
+            - DESC: Array that contains a range of values in which quartiles can be calculated from
+    @return:
+        - DATA TYPE: object
+        - DESC: Object that contains the break values for the calculated quartiles
+    @usage:
+        - 
+*/
+Quartile = range => {
+    // skeleton object to hold break values; will be the returned value of the function
     let quarValues = {
         '0.25': undefined,
         '0.50': undefined,
         '0.75': undefined,
         'max': undefined
     }
-    array.sort((a,b)=>{
-        return a -b
+    // sort in ascending order
+    range.sort((a, b) => {
+        return a - b
     })
     // fudge stuff so we're not multiplying by zero or making shitty quantiles for results that don't have a large range
-    let position = parseInt((array.length/4),10)
-    if (position == 0){
+    let position = parseInt((range.length / 4), 10) 
+    if (position == 0) {
         let position = 2
     }
-    let max = Math.max.apply(null, array)
+    let max = Math.max.apply(null, range)
     cnt = 1
     // assign index position of quantile breakpoints
-    for (q in quarValues){
-        let index = position*cnt
-        cnt == 4 ? quarValues[q] = max : quarValues[q] = array[index]
-        cnt ++
+    for (q in quarValues) {
+        let index = position * cnt
+        cnt == 4 ? quarValues[q] = max : quarValues[q] = range[index]
+        cnt++
     }
     return quarValues
 }
-// helper function to create the hex layers
-hex_layer = (id, quartiles, infoArray) => {
+/* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
+    @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
+    @params:
+        @id: 
+            - DATA TYPE: string
+            - DESC: Identifier that will be assigned to the map layer
+        @quartiles: 
+            - DATA TYPE: object
+            - DESC: Object that contains the classification break points that is outputted by the Quartiles function (def: L26)
+        @infoArray: 
+            - DATA TYPE: object
+            - DESC: Object that contains operator and line type information to be used to assign the appropriate color scheme
+    @usage:
+        - L212
+*/
+HexStyling = (id, quartiles, infoArray) => {
     // color schemes for each operator
-    const schemes =  {
+    const schemes = {
         'SEPTA': {
             'Regional Rail & Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
             'Commuter Rail': ["#c1e7ff", '#86b0cc', '#4c7c9b', '#004c6d'],
@@ -52,7 +78,7 @@ hex_layer = (id, quartiles, infoArray) => {
         'DRPA': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b'],
         'Amtrak': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d'],
         'NJ Transit': {
-            'Commuter Rail': ['#e2e2e2','#f18541', '#b02c87', '#045099'],
+            'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
             'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
         },
         'PennDOT': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
@@ -64,16 +90,17 @@ hex_layer = (id, quartiles, infoArray) => {
         'source': id,
         'paint': {
             'fill-color': {
-                property : 'count',
+                property: 'count',
                 type: 'interval',
                 stops: [
-                    [0, schemes[infoArray[0]][infoArray[1]][0]],
-                    [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][1]],
-                    [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][2]],
-                    [quartiles['max'],  schemes[infoArray[0]][infoArray[1]][3]]
+                    [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][0]],
+                    [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][1]],
+                    [quartiles['0.75'], schemes[infoArray[0]][infoArray[1]][2]],
+                    [quartiles['max'], schemes[infoArray[0]][infoArray[1]][3]]
                 ]
             },
-            'fill-outline-color': '#fff'
+            'fill-outline-color': 'rgba(0,0,0,.75)',
+            'fill-opacity': .75
         }
     }
 }
@@ -82,7 +109,7 @@ hex_layer = (id, quartiles, infoArray) => {
 const form = document.querySelector('#main-form')
 let data = undefined
 // populate dropdowns with possible query values
-    // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
+// @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
 fetch('http://localhost:8000/test')
     .then(response => {
         if (response.ok) {
@@ -96,7 +123,7 @@ fetch('http://localhost:8000/test')
                         }
                         // get the new station value
                         let station = e.target.value
-                    
+
                         // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
                         jawn.forEach(feature => {
                             if (feature[station]) {
@@ -117,7 +144,7 @@ fetch('http://localhost:8000/test')
                         option.innerText = k
                         form[0].appendChild(option)
                     })
-                return data = jawn
+                    return data = jawn
                 })
         }
     })
@@ -132,17 +159,17 @@ form.onsubmit = e => {
     }
     let station = e.target[0].value,
         selectedYear = e.target[1].value
-    
-    // info to pass to hex_layer function (L186) to apply appropriate color scheme to results
+
+    // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
     let stationInfo = []
-    data.forEach(i=>{
-        if(i[station]){
+    data.forEach(i => {
+        if (i[station]) {
             stationInfo.push(i[station].operator)
             let mode = i[station].mode
-             mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
+            mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
         }
     })
-    
+
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
     fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
         .then(response => {
@@ -155,9 +182,9 @@ form.onsubmit = e => {
                             let fids = []
                             for (let k in jawn) { fids.push(jawn[k].id) }
                             // arcgis call
-                                // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue)
+                            // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
                             fetch(
-                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`, {
+                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`, {
                                     method: 'POST'
                                 }
                             ).then(response => {
@@ -182,10 +209,25 @@ form.onsubmit = e => {
                                         })
 
 
-                                        map.addLayer(hex_layer('hexBins', quartiles, stationInfo))
-
+                                        map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
 
                                         // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
+                                        fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
+                                            .then(response => {
+                                                if (response.ok) {
+                                                    response.json()
+                                                        .then(extentReturn => {
+                                                            // calculate center???
+                                                            // @TODO: There has to be a better way to do this
+                                                            let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
+                                                            map.flyTo({
+                                                                center: bounds,
+                                                                zoom: 9,
+                                                                speed: 0.3,
+                                                            })
+                                                        })
+                                                }
+                                            })
                                     })
                                 }
                             }).catch(error => console.error(error))
@@ -193,32 +235,4 @@ form.onsubmit = e => {
                     })
             }
         }).catch(error => console.error(error))
-
-
-    /* ~*$--- THIS IS WHAT YOU USE IF YOU DON'T HOLD THE KEYS TO THE CASTLE ---$*~ */
-
-    // assuming the selected year exists for that station --- 
-    // easy to fix once real data is used b/c "I can add a function into the api that will just get a list of stations/years that they can generate from i guess or just have a reference json or something that has the stations and each survey year" -rbeatty
-    // if (responseObj) {
-
-    //     // get them ID's
-    //     responseObj.forEach(shed => fids.push(shed.id))
-
-    //     fetch(
-    //         `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&f=pgeojson`
-    //     ).then(response => {
-    //         if (response.ok) {
-    //             response.json().then(hexBins => {
-
-    //                 // throw some honeycombs on the map #saveTheBees
-    //                 map.addSource('hexBins', {
-    //                     type: 'geojson',
-    //                     data: hexBins
-    //                 })
-
-    //                 map.addLayer(hex_layer('hexBins'))
-    //             })
-    //         }
-    //     }).catch(error => console.error(error))
-    // }
 }
