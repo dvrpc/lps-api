@@ -18,11 +18,12 @@
 
     <body>
         <nav>
-            <img src="./img/noGoodVeryBadLogo.png" />
+            <a href="https://www.dvrpc.org/" target="_blank" rel="noopener"><img src="./img/3d_WhitePrimaryXSmall.png" /></a>
             <form id="main-form">
                 <p>Search Stations:</p>
-                <select name='station' class="station-input">
+                <select name='station'>
                     <!-- Build station/year query based on look up table -->
+                    <option value="default" selected>Please Select a Station to Continue</option>
                 </select>
 
                 <select name='year'>
@@ -34,7 +35,7 @@
 
         <main role='main' id='map'>
             <div class="legend__container">
-                <a class="legend__toggle" rel="noopener">Click for More Information</a>
+                <a href='#' class="legend__toggle" rel="noopener">Click for More Information</a>
                 <div class="legend__body">
                 </div>
             </div>

@@ -274,22 +274,22 @@ form.onsubmit = e => {
                                         BuildLegend(stationInfo)
                                         map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
 
-                                        // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
-                                        fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
-                                            .then(response => {
-                                                if (response.ok) {
-                                                    response.json()
-                                                        .then(extentReturn => {
-                                                            // calculate center???
-                                                            // @TODO: There has to be a better way to do this
-                                                            let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
-                                                            map.flyTo({
-                                                                center: bounds,
-                                                                zoom: 9,
-                                                                speed: 0.3,
+                                            // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
+                                            fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
+                                                .then(response => {
+                                                    if (response.ok) {
+                                                        response.json()
+                                                            .then(extentReturn => {
+                                                                // calculate center???
+                                                                // @TODO: There has to be a better way to do this
+                                                                let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
+                                                                map.flyTo({
+                                                                    center: bounds,
+                                                                    zoom: 9,
+                                                                    speed: 0.3,
+                                                                })
                                                             })
-                                                        })
-                                                }
+                                                        }
                                             })
                                     })
                                 }
@@ -301,9 +301,10 @@ form.onsubmit = e => {
 }
 
 
-// let legendToggle = document.querySelector('.legend-toggle')
-// legendToggle.addEventListener('click', e=>{
-//     let body = legendToggle.nextElementSibling
-//     body.classList.toggle('is-visible')
-//     body.classList.contains('is-visible') ? body.style.display = 'block' : body.style.display = 'none'
-// })
+let legendToggle = document.querySelector('.legend__toggle')
+legendToggle.addEventListener('click', e=>{
+    e.stopPropagation()
+    let body = legendToggle.nextElementSibling
+    body.classList.toggle('visible')
+    body.classList.contains('visible') ? console.log('visible') : console.log('not visible')
+})
