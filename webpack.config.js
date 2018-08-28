@@ -14,8 +14,9 @@ module.exports = {
             {
                 test: /\.js$/,
                 loader: 'babel-loader',
-                query: {
-                    presets: ['es2015'] // convert everything to ES2015
+                exclude: /node_modules/,
+                options: {
+                    presets: ["env", "es2015"] // convert everything to ES2015
                 } 
             },
             // want to bundle your CSS files? i got u fam

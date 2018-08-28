@@ -1,3 +1,5 @@
+
+
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
 
 const map = new mapboxgl.Map({
@@ -23,7 +25,7 @@ map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
     @usage:
         - 
 */
-Quartile = range => {
+const Quartile = range => {
     // skeleton object to hold break values; will be the returned value of the function
     let quarValues = {
         '0.25': undefined,
@@ -50,6 +52,36 @@ Quartile = range => {
     }
     return quarValues
 }
+
+
+
+
+/* BuildLegend(content)
+*/
+const BuildLegend = content =>{
+    const legendBody = document.querySelector(".legend__body")
+    
+    // numerical summaries
+    legendBody.innerHTML = `
+    <h1>${content.name}</h1>
+    <div class="legend__summary-container">
+        <p class="legend__summary-text"><span class="legend__station-emphasis">${content.operator}</span> operated <span class="legend__station-emphasis">${content.mode}</span> station.</p>
+    </div>
+    <div class="legend__number-summary">
+        <div class="legend__summary-container">
+            <p class="legend__summary-emphasis">${content.range.reduce((a,b)=>a+b)}</p>
+            <p class="legend__summary-text">Total Commuters</p>
+        </div>
+        <div class="legend__summary-container">
+            <p class="legend__summary-emphasis">84</p>
+            <p class="legend__summary-text">Distance</p>
+        </div>
+    </div>
+    <div class="legend__summary"></div>`
+}
+
+
+
 /* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
     @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
     @params:
@@ -65,7 +97,7 @@ Quartile = range => {
     @usage:
         - L212
 */
-HexStyling = (id, quartiles, infoArray) => {
+const HexStyling = (id, quartiles, infoArray) => {
     // color schemes for each operator
     const schemes = {
         'SEPTA': {
@@ -90,7 +122,7 @@ HexStyling = (id, quartiles, infoArray) => {
         },
         'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
     }
-    if (infoArray[0] != infoArray[1]) {
+    if (infoArray.operator.length != 1) {
         return {
             'id': id,
             'type': 'fill',
@@ -100,10 +132,10 @@ HexStyling = (id, quartiles, infoArray) => {
                     property: 'count',
                     type: 'interval',
                     stops: [
-                        [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][0]],
-                        [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][1]],
-                        [quartiles['0.75'], schemes[infoArray[0]][infoArray[1]][2]],
-                        [quartiles['max'], schemes[infoArray[0]][infoArray[1]][3]]
+                        [quartiles['0.25'], schemes[infoArray.operator][infoArray.mode][0]],
+                        [quartiles['0.50'], schemes[infoArray.operator][infoArray.mode][1]],
+                        [quartiles['0.75'], schemes[infoArray.operator][infoArray.mode][2]],
+                        [quartiles['max'], schemes[infoArray.operator][infoArray.mode][3]]
                     ]
                 },
                 'fill-outline-color': 'rgba(0,0,0,.75)',
@@ -121,10 +153,10 @@ HexStyling = (id, quartiles, infoArray) => {
                     property: 'count',
                     type: 'interval',
                     stops: [
-                        [quartiles['0.25'], schemes[infoArray[0]][0]],
-                        [quartiles['0.50'], schemes[infoArray[0]][1]],
-                        [quartiles['0.75'], schemes[infoArray[0]][2]],
-                        [quartiles['max'], schemes[infoArray[0]][3]]
+                        [quartiles['0.25'], schemes[infoArray[infoArray.operator]][0]],
+                        [quartiles['0.50'], schemes[infoArray[infoArray.operator]][1]],
+                        [quartiles['0.75'], schemes[infoArray[infoArray.operator]][2]],
+                        [quartiles['max'], schemes[infoArray[infoArray.operator]][3]]
                     ]
                 },
                 'fill-outline-color': 'rgba(0,0,0,.75)',
@@ -190,13 +222,18 @@ form.onsubmit = e => {
         selectedYear = e.target[1].value
 
     // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
-    let stationInfo = []
+    let stationInfo = {
+        'name': station,
+        'operator': undefined,
+        'mode': undefined,
+        'range': []
+    }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
     data.forEach(i => {
         if (i[station]) {
-            stationInfo.push(i[station].operator)
+            stationInfo['operator'] = i[station].operator
             let mode = i[station].mode
-            mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
+            mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
         }
     })
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
@@ -219,22 +256,22 @@ form.onsubmit = e => {
                                     response.json().then(hexBins => {
                                         // bind count data to arcgis response
                                         // create a range array that can be used to calculate quartile classification break points
-                                        let range = []
                                         jawn.forEach(count => {
                                             let features = hexBins.features
                                             for (let i in features) {
                                                 if (features[i].properties.FID == count.id) {
                                                     features[i].properties.count = count.count
-                                                    range.push(count.count)
+                                                    stationInfo['range'].push(count.count)
                                                 }
                                             }
                                         })
-                                        let quartiles = Quartile(range) // calculate classification break points
+                                        let quartiles = Quartile(stationInfo['range']) // calculate classification break points
                                         // throw some honeycombs on the map #saveTheBees
                                         map.addSource('hexBins', {
                                             type: 'geojson',
                                             data: hexBins
                                         })
+                                        BuildLegend(stationInfo)
                                         map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
 
                                         // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
@@ -262,3 +299,11 @@ form.onsubmit = e => {
             }
         }).catch(error => console.error(error))
 }
+
+
+// let legendToggle = document.querySelector('.legend-toggle')
+// legendToggle.addEventListener('click', e=>{
+//     let body = legendToggle.nextElementSibling
+//     body.classList.toggle('is-visible')
+//     body.classList.contains('is-visible') ? body.style.display = 'block' : body.style.display = 'none'
+// })

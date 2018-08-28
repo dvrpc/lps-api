@@ -58,6 +58,68 @@ select, input[type="submit"]{
 main{
     height: 85vh;
 }
+    /* Legend */
+    .legend__container{
+        width: 20vw;
+        position: absolute;
+        max-height: 50vh;
+        z-index: 2;
+    }
+
+    .legend__toggle{
+        position: absolute;
+        background: #91BCDF;
+        text-align: center;
+        font-weight: 700;
+        color: #0078AE;
+        width: 100%;
+        z-index: 2;
+        height: 2.5em;
+    }
+
+    .legend__body{
+        display: block; 
+        position: absolute;
+        width: 100%;
+        height: 40vh;
+        background: white;
+        opacity: 0.85;
+        z-index: 1;
+        padding-top: 3em;
+        text-align: center;
+    }
+
+    .legend__number-summary{
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+    }
+
+    .legend__number-summary>div>*{
+        padding: 5px;
+        margin: 0;
+    }
+    .legend__summary-emphasis{
+        font-weight: 700;
+        color: #3a3a3a;
+        font-size: 2em;
+    }
+    .legend__station-emphasis{
+        font-weight: 700;
+        color: #3a3a3a;
+    }
+    .legend__summary-text{
+        color: #6f6f6f;
+    }
+    .legend__station-summary{
+        display: flex;
+        flex-flow: column;
+    }
+    .legend__station-summary>div>*{
+        padding: 0;
+        margin: 0 0 2%
+    }
+
 
 /*Transitions*/
 input[type="submit"]:hover{
