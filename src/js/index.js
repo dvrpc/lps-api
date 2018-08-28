@@ -36,14 +36,14 @@ Quartile = range => {
         return a - b
     })
     // fudge stuff so we're not multiplying by zero or making shitty quantiles for results that don't have a large range
-    let position = parseInt((range.length / 4), 10) 
+    let position = parseInt((range.length / 4), 10)
     if (position == 0) {
         let position = 2
     }
     let max = Math.max.apply(null, range)
-    cnt = 1
+    let cnt = 1
     // assign index position of quantile breakpoints
-    for (q in quarValues) {
+    for (let q in quarValues) {
         let index = position * cnt
         cnt == 4 ? quarValues[q] = max : quarValues[q] = range[index]
         cnt++
@@ -69,38 +69,67 @@ HexStyling = (id, quartiles, infoArray) => {
     // color schemes for each operator
     const schemes = {
         'SEPTA': {
-            'Regional Rail & Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
+            'Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
             'Commuter Rail': ["#c1e7ff", '#86b0cc', '#4c7c9b', '#004c6d'],
             'Surface Trolley': ['#d1eac7', '#a7cd99', '#7db06d', '#529442'],
             'Subway': ['#ffdbc2', '#ffbe8e', '#fca05a', '#f58221'],
             'Subway/Elevated': ['#cae5ff', '#97c1ea', '#619fd6', '#067dc1'],
         },
-        'DRPA': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b'],
-        'Amtrak': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d'],
+        'DRPA': {
+            'Rapid Transit': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b']
+        },
+        'Amtrak': {
+            'Intercity Passenger Rail': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d']
+        },
         'NJ Transit': {
             'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
             'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
         },
-        'PennDOT': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
+        'PennDOT': {
+            'Park and Ride': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
+        },
+        'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
     }
-
-    return {
-        'id': id,
-        'type': 'fill',
-        'source': id,
-        'paint': {
-            'fill-color': {
-                property: 'count',
-                type: 'interval',
-                stops: [
-                    [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][0]],
-                    [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][1]],
-                    [quartiles['0.75'], schemes[infoArray[0]][infoArray[1]][2]],
-                    [quartiles['max'], schemes[infoArray[0]][infoArray[1]][3]]
-                ]
-            },
-            'fill-outline-color': 'rgba(0,0,0,.75)',
-            'fill-opacity': .75
+    if (infoArray[0] != infoArray[1]) {
+        return {
+            'id': id,
+            'type': 'fill',
+            'source': id,
+            'paint': {
+                'fill-color': {
+                    property: 'count',
+                    type: 'interval',
+                    stops: [
+                        [quartiles['0.25'], schemes[infoArray[0]][infoArray[1]][0]],
+                        [quartiles['0.50'], schemes[infoArray[0]][infoArray[1]][1]],
+                        [quartiles['0.75'], schemes[infoArray[0]][infoArray[1]][2]],
+                        [quartiles['max'], schemes[infoArray[0]][infoArray[1]][3]]
+                    ]
+                },
+                'fill-outline-color': 'rgba(0,0,0,.75)',
+                'fill-opacity': .75
+            }
+        }
+    }
+    else {
+        return {
+            'id': id,
+            'type': 'fill',
+            'source': id,
+            'paint': {
+                'fill-color': {
+                    property: 'count',
+                    type: 'interval',
+                    stops: [
+                        [quartiles['0.25'], schemes[infoArray[0]][0]],
+                        [quartiles['0.50'], schemes[infoArray[0]][1]],
+                        [quartiles['0.75'], schemes[infoArray[0]][2]],
+                        [quartiles['max'], schemes[infoArray[0]][3]]
+                    ]
+                },
+                'fill-outline-color': 'rgba(0,0,0,.75)',
+                'fill-opacity': .75
+            }
         }
     }
 }
@@ -162,6 +191,7 @@ form.onsubmit = e => {
 
     // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
     let stationInfo = []
+    // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
     data.forEach(i => {
         if (i[station]) {
             stationInfo.push(i[station].operator)
@@ -169,14 +199,13 @@ form.onsubmit = e => {
             mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
         }
     })
-
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
     fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
         .then(response => {
             if (response.status == 200) {
                 response.json()
                     .then(jawn => {
-                        if (!jawn.length) alert('yo that aint right')
+                        if (jawn.code) alert(jawn.error)
                         else {
                             // build your arcgis query parameter while making your db call 
                             let fids = []
@@ -184,13 +213,12 @@ form.onsubmit = e => {
                             // arcgis call
                             // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
                             fetch(
-                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&f=pgeojson`, {
-                                    method: 'POST'
-                                }
+                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&geometryPrecision=4&f=pgeojson`
                             ).then(response => {
                                 if (response.ok) {
                                     response.json().then(hexBins => {
                                         // bind count data to arcgis response
+                                        // create a range array that can be used to calculate quartile classification break points
                                         let range = []
                                         jawn.forEach(count => {
                                             let features = hexBins.features
@@ -207,8 +235,6 @@ form.onsubmit = e => {
                                             type: 'geojson',
                                             data: hexBins
                                         })
-
-
                                         map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
 
                                         // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
