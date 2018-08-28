@@ -192,73 +192,79 @@ form.onsubmit = e => {
     // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
     let stationInfo = []
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
-    data.forEach(i => {
-        if (i[station]) {
-            stationInfo.push(i[station].operator)
-            let mode = i[station].mode
-            mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
-        }
-    })
-    // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
-    fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
-        .then(response => {
-            if (response.status == 200) {
-                response.json()
-                    .then(jawn => {
-                        if (jawn.code) alert(jawn.error)
-                        else {
-                            // build your arcgis query parameter while making your db call 
-                            let fids = []
-                            for (let k in jawn) { fids.push(jawn[k].id) }
-                            // arcgis call
-                            // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
-                            fetch(
-                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&geometryPrecision=4&f=pgeojson`
-                            ).then(response => {
-                                if (response.ok) {
-                                    response.json().then(hexBins => {
-                                        // bind count data to arcgis response
-                                        // create a range array that can be used to calculate quartile classification break points
-                                        let range = []
-                                        jawn.forEach(count => {
-                                            let features = hexBins.features
-                                            for (let i in features) {
-                                                if (features[i].properties.FID == count.id) {
-                                                    features[i].properties.count = count.count
-                                                    range.push(count.count)
-                                                }
-                                            }
-                                        })
-                                        let quartiles = Quartile(range) // calculate classification break points
-                                        // throw some honeycombs on the map #saveTheBees
-                                        map.addSource('hexBins', {
-                                            type: 'geojson',
-                                            data: hexBins
-                                        })
-                                        map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
-
-                                        // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
-                                        fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
-                                            .then(response => {
-                                                if (response.ok) {
-                                                    response.json()
-                                                        .then(extentReturn => {
-                                                            // calculate center???
-                                                            // @TODO: There has to be a better way to do this
-                                                            let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
-                                                            map.flyTo({
-                                                                center: bounds,
-                                                                zoom: 9,
-                                                                speed: 0.3,
-                                                            })
-                                                        })
+    if (station == "default"){
+        alert("Please select a station from the dropdown menu to begin")
+        console.log({station})
+    }
+    else{
+        data.forEach(i => {
+            if (i[station]) {
+                stationInfo.push(i[station].operator)
+                let mode = i[station].mode
+                mode.indexOf('(Regional Rail') != -1 ? stationInfo.push('Commuter Rail') : stationInfo.push(mode)
+            }
+        })
+        // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
+        fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
+            .then(response => {
+                if (response.status == 200) {
+                    response.json()
+                        .then(jawn => {
+                            if (jawn.code) alert(jawn.error)
+                            else {
+                                // build your arcgis query parameter while making your db call 
+                                let fids = []
+                                for (let k in jawn) { fids.push(jawn[k].id) }
+                                // arcgis call
+                                // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
+                                fetch(
+                                    `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&geometryPrecision=4&f=pgeojson`
+                                ).then(response => {
+                                    if (response.ok) {
+                                        response.json().then(hexBins => {
+                                            // bind count data to arcgis response
+                                            // create a range array that can be used to calculate quartile classification break points
+                                            let range = []
+                                            jawn.forEach(count => {
+                                                let features = hexBins.features
+                                                for (let i in features) {
+                                                    if (features[i].properties.FID == count.id) {
+                                                        features[i].properties.count = count.count
+                                                        range.push(count.count)
+                                                    }
                                                 }
                                             })
-                                    })
-                                }
-                            }).catch(error => console.error(error))
-                        }
-                    })
-            }
-        }).catch(error => console.error(error))
+                                            let quartiles = Quartile(range) // calculate classification break points
+                                            // throw some honeycombs on the map #saveTheBees
+                                            map.addSource('hexBins', {
+                                                type: 'geojson',
+                                                data: hexBins
+                                            })
+                                            map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
+
+                                            // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
+                                            fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
+                                                .then(response => {
+                                                    if (response.ok) {
+                                                        response.json()
+                                                            .then(extentReturn => {
+                                                                // calculate center???
+                                                                // @TODO: There has to be a better way to do this
+                                                                let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
+                                                                map.flyTo({
+                                                                    center: bounds,
+                                                                    zoom: 9,
+                                                                    speed: 0.3,
+                                                                })
+                                                            })
+                                                    }
+                                                })
+                                        })
+                                    }
+                                }).catch(error => console.error(error))
+                            }
+                        })
+                }
+            }).catch(error => console.error(error))
+        }
 }
