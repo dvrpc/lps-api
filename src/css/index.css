@@ -88,14 +88,17 @@ main{
 
     .legend__toggle{
         position: absolute;
-        background: #91BCDF;
+        background: #91bcdf;
         text-align: center;
-        font-weight: 700;
-        color: #0078AE;
+        color: white;
         width: 100%;
         z-index: 2;
-        height: 2.5em;
-    }
+        border-bottom: 4px solid #0078ae;
+        margin: auto;
+        font-size: 1.25em;
+        padding: 5px 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
 
     .legend__toggle.is-visible{
         display: block;
@@ -105,12 +108,13 @@ main{
         display: block; 
         position: absolute;
         width: 100%;
-        height: 40vh;
+        height: 30vh;
         background: white;
         opacity: 0.85;
         z-index: 1;
         padding-top: 3em;
         text-align: center;
+        box-shadow: 3px 3px 5px 1px #a6a6a6;
     }
 
     .legend__number-summary{
@@ -123,25 +127,29 @@ main{
         padding: 5px;
         margin: 0;
     }
-    .legend__summary-emphasis{
+    .legend__emphasis{
         font-weight: 700;
         color: #3a3a3a;
+    }
+    .legend__emphasis.summary{
         font-size: 2em;
     }
-    .legend__station-emphasis{
-        font-weight: 700;
-        color: #3a3a3a;
-    }
-    .legend__summary-text{
+    .legend__text{
         color: #6f6f6f;
     }
-    .legend__station-summary{
+    .legend__summary{
         display: flex;
         flex-flow: column;
     }
-    .legend__station-summary>div>*{
+    .legend__summary>div>*{
         padding: 0;
         margin: 0 0 2%
+    }
+    .legend__distribution-summary{
+        height: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
 

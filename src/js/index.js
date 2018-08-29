@@ -1,6 +1,30 @@
-
+import {ckmeans} from '../../node_modules/simple-statistics'
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
+// color schemes for each operator
+const schemes = {
+    'SEPTA': {
+        'Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
+        'Commuter Rail': ["#c1e7ff", '#86b0cc', '#4c7c9b', '#004c6d'],
+        'Surface Trolley': ['#d1eac7', '#a7cd99', '#7db06d', '#529442'],
+        'Subway': ['#ffdbc2', '#ffbe8e', '#fca05a', '#f58221'],
+        'Subway/Elevated': ['#cae5ff', '#97c1ea', '#619fd6', '#067dc1'],
+    },
+    'DRPA': {
+        'Rapid Transit': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b']
+    },
+    'Amtrak': {
+        'Intercity Passenger Rail': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d']
+    },
+    'NJ Transit': {
+        'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
+        'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
+    },
+    'PennDOT': {
+        'Park and Ride': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
+    },
+    'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
+}
 
 const map = new mapboxgl.Map({
     container: 'map',
@@ -12,72 +36,72 @@ const map = new mapboxgl.Map({
 
 map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
-
-/* Quartile(range) -- rbeatty
-    @desc: Dynamically calculate quartile break values based on values in input array 
-    @params:
-        @range: 
-            - DATA TYPE: array
-            - DESC: Array that contains a range of values in which quartiles can be calculated from
-    @return:
-        - DATA TYPE: object
-        - DESC: Object that contains the break values for the calculated quartiles
-    @usage:
-        - 
-*/
-const Quartile = range => {
-    // skeleton object to hold break values; will be the returned value of the function
-    let quarValues = {
-        '0.25': undefined,
-        '0.50': undefined,
-        '0.75': undefined,
-        'max': undefined
-    }
-    // sort in ascending order
-    range.sort((a, b) => {
-        return a - b
-    })
-    // fudge stuff so we're not multiplying by zero or making shitty quantiles for results that don't have a large range
-    let position = parseInt((range.length / 4), 10)
-    if (position == 0) {
-        let position = 2
-    }
-    let max = Math.max.apply(null, range)
-    let cnt = 1
-    // assign index position of quantile breakpoints
-    for (let q in quarValues) {
-        let index = position * cnt
-        cnt == 4 ? quarValues[q] = max : quarValues[q] = range[index]
-        cnt++
-    }
-    return quarValues
-}
-
-
-
-
 /* BuildLegend(content)
 */
-const BuildLegend = content =>{
+const BuildLegend = (content, colorScheme) =>{
+
+    // content.range.sort((a,b) =>{
+    //     console.log({a})
+    //     console.log({b})
+    //     return a-b
+    // })
+    // let position = parseInt((content.range.length/4), 10)
+    // if (position == 0){
+    //     let position = 2
+    // }
+    // let max = Math.max.apply(null, content.range)
+    // let x = 0;
+    // while (x<4){
+    //     let index = x * position
+    //     x == 3 ? content.breaks.push(max) : content.breaks.push(content.range[index])
+    //     x++
+    // }
+    let temp = content.range.length>4 ? ckmeans(content.range, 4) : ckmeans(content.range, content.range.length)
+    temp.forEach(cluster=>{
+        let temp = { 'break': cluster[cluster.length-1], 'count': cluster.length}
+        content.breaks.push(temp)
+    })
+    console.log(content.breaks)
+    
     const legendBody = document.querySelector(".legend__body")
     
     // numerical summaries
     legendBody.innerHTML = `
-    <h1>${content.name}</h1>
+    <h1 class="legend__emphasis">${content.name}</h1>
     <div class="legend__summary-container">
-        <p class="legend__summary-text"><span class="legend__station-emphasis">${content.operator}</span> operated <span class="legend__station-emphasis">${content.mode}</span> station.</p>
+        <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station.</p>
     </div>
     <div class="legend__number-summary">
         <div class="legend__summary-container">
-            <p class="legend__summary-emphasis">${content.range.reduce((a,b)=>a+b)}</p>
-            <p class="legend__summary-text">Total Commuters</p>
+            <p class="legend__emphasis summary">${content.range.reduce((a,b)=>a+b)}</p>
+            <p class="legend__text">Total Commuters</p>
         </div>
         <div class="legend__summary-container">
-            <p class="legend__summary-emphasis">84</p>
-            <p class="legend__summary-text">Distance</p>
+            <p class="legend__emphasis summary">84</p>
+            <p class="legend__text">Distance</p>
         </div>
     </div>
-    <div class="legend__summary"></div>`
+    <div class="legend__distribution-summary">
+    </div>`
+    const emphasis = document.querySelectorAll(".legend__emphasis")
+    emphasis.forEach(node=>{
+        node.style.color = colorScheme[content.operator][content.mode][2]
+    })
+    let i = 0
+    colorScheme[content.operator][content.mode].forEach(classification=>{
+        const container = document.querySelector(".legend__distribution-summary")
+        let legendItem = document.createElement("div")
+        let height = container.clientHeight/3
+        if (i <2){
+            legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; font-weight: 700`
+        }
+        else {
+            legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; color: white; font-weight: 700`
+        }
+        legendItem.innerHTML = `<p>${content.breaks[i]['break']}</p>`
+        container.appendChild(legendItem)
+        i ++
+    })
 }
 
 
@@ -97,31 +121,7 @@ const BuildLegend = content =>{
     @usage:
         - L212
 */
-const HexStyling = (id, quartiles, infoArray) => {
-    // color schemes for each operator
-    const schemes = {
-        'SEPTA': {
-            'Rapid Transit': ["#fbd8f6", '#dda5d6', '#be72b6', '#9e3e97'],
-            'Commuter Rail': ["#c1e7ff", '#86b0cc', '#4c7c9b', '#004c6d'],
-            'Surface Trolley': ['#d1eac7', '#a7cd99', '#7db06d', '#529442'],
-            'Subway': ['#ffdbc2', '#ffbe8e', '#fca05a', '#f58221'],
-            'Subway/Elevated': ['#cae5ff', '#97c1ea', '#619fd6', '#067dc1'],
-        },
-        'DRPA': {
-            'Rapid Transit': ['#ffd6d5', '#ffa3a4', '#fa6c76', '#ed164b']
-        },
-        'Amtrak': {
-            'Intercity Passenger Rail': ['#e2e2e2', '#a4b1c0', '#65829e', '#1b567d']
-        },
-        'NJ Transit': {
-            'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
-            'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
-        },
-        'PennDOT': {
-            'Park and Ride': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
-        },
-        'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
-    }
+const HexStyling = (id, infoArray, colorScheme) => {
     if (infoArray.operator.length != 1) {
         return {
             'id': id,
@@ -132,10 +132,10 @@ const HexStyling = (id, quartiles, infoArray) => {
                     property: 'count',
                     type: 'interval',
                     stops: [
-                        [quartiles['0.25'], schemes[infoArray.operator][infoArray.mode][0]],
-                        [quartiles['0.50'], schemes[infoArray.operator][infoArray.mode][1]],
-                        [quartiles['0.75'], schemes[infoArray.operator][infoArray.mode][2]],
-                        [quartiles['max'], schemes[infoArray.operator][infoArray.mode][3]]
+                        [infoArray.breaks[0]['break'], colorScheme[infoArray.operator][infoArray.mode][0]],
+                        [infoArray.breaks[1]['break'], colorScheme[infoArray.operator][infoArray.mode][1]],
+                        [infoArray.breaks[2]['break'], colorScheme[infoArray.operator][infoArray.mode][2]],
+                        [infoArray.breaks[3]['break'], colorScheme[infoArray.operator][infoArray.mode][3]]
                     ]
                 },
                 'fill-outline-color': 'rgba(0,0,0,.75)',
@@ -153,10 +153,10 @@ const HexStyling = (id, quartiles, infoArray) => {
                     property: 'count',
                     type: 'interval',
                     stops: [
-                        [quartiles['0.25'], schemes[infoArray[infoArray.operator]][0]],
-                        [quartiles['0.50'], schemes[infoArray[infoArray.operator]][1]],
-                        [quartiles['0.75'], schemes[infoArray[infoArray.operator]][2]],
-                        [quartiles['max'], schemes[infoArray[infoArray.operator]][3]]
+                        [infoArray.breaks[0]['break'], colorScheme[infoArray[infoArray.operator]][0]],
+                        [infoArray.breaks[1]['break'], colorScheme[infoArray[infoArray.operator]][1]],
+                        [infoArray.breaks[2]['break'], colorScheme[infoArray[infoArray.operator]][2]],
+                        [infoArray.breaks[3]['break'], colorScheme[infoArray[infoArray.operator]][3]]
                     ]
                 },
                 'fill-outline-color': 'rgba(0,0,0,.75)',
@@ -226,7 +226,8 @@ form.onsubmit = e => {
         'name': station,
         'operator': undefined,
         'mode': undefined,
-        'range': []
+        'range': [],
+        'breaks': []
     }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
     data.forEach(i => {
@@ -265,14 +266,14 @@ form.onsubmit = e => {
                                                 }
                                             }
                                         })
-                                        let quartiles = Quartile(stationInfo['range']) // calculate classification break points
+                                        // stationInfo['breaks'] = Quartile(stationInfo['range']) // calculate classification break points
                                         // throw some honeycombs on the map #saveTheBees
                                         map.addSource('hexBins', {
                                             type: 'geojson',
                                             data: hexBins
                                         })
-                                        BuildLegend(stationInfo)
-                                        map.addLayer(HexStyling('hexBins', quartiles, stationInfo))
+                                        BuildLegend(stationInfo, schemes)
+                                        map.addLayer(HexStyling('hexBins', stationInfo, schemes))
 
                                             // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
                                             fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)

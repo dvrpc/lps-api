@@ -16,7 +16,7 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
-                    presets: ["env", "es2015"] // convert everything to ES2015
+                    presets: ["env", "es2015", 'stage-2'] // convert everything to ES2015
                 } 
             },
             // want to bundle your CSS files? i got u fam
