@@ -1,44 +1,58 @@
 <!DOCTYPE html>
 <html lang='en'>
-    <head>
-        <meta charset='utf-8'>
-        <meta name='Viewport' content='width=device-width, initial-scale=1'>
-        <meta name='Title' content='DVRPC Station Shed Viewer'>
-        <meta name='Description' content='View results for a survey of cars at rail stations in the DVRPC region and gain and understanding of where railway commuters are coming from'>
-        <meta name='Keywords' content='station sheds, station, railway, commuters, railway commuters, urban planning, DVRPC'>
-        <meta name='Owner' content='webmaster@dvrpc.org'>
-        <meta name='Robots' content='index, follow'>
-        <meta name='Distribution' content='global'>
-        <!-- external files -->
-        <link rel='stylesheet' type='text/css' href='./css/index.css'>
-        <link rel='stylesheet' type='text/css' href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' />
-        <script type='text/javascript' src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
-        <script src='./js/index.js' type="module"></script>
-    </head>
 
-    <body>
-        <nav>
-            <a href="https://www.dvrpc.org/" target="_blank" rel="noopener"><img src="./img/3d_WhitePrimaryXSmall.png" /></a>
-            <form id="main-form">
-                <p>Search Stations:</p>
-                <select name='station'>
-                    <!-- Build station/year query based on look up table -->
-                    <option value="default" selected>Please Select a Station to Continue</option>
-                </select>
+<head>
+    <meta charset='utf-8'>
+    <meta name='Viewport' content='width=device-width, initial-scale=1'>
+    <meta name='Title' content='DVRPC Station Shed Viewer'>
+    <meta name='Description' content='View results for a survey of cars at rail stations in the DVRPC region and gain and understanding of where railway commuters are coming from'>
+    <meta name='Keywords' content='station sheds, station, railway, commuters, railway commuters, urban planning, DVRPC'>
+    <meta name='Owner' content='webmaster@dvrpc.org'>
+    <meta name='Robots' content='index, follow'>
+    <meta name='Distribution' content='global'>
+    <!-- external files -->
+    <link rel='stylesheet' type='text/css' href='./css/index.css'>
+    <link rel='stylesheet' type='text/css' href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script type='text/javascript' src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
+    <script src='./js/index.js' type="module"></script>
+</head>
 
-                <select name='year'>
-                </select>
+<body>
+    <nav>
+        <a href="https://www.dvrpc.org/" target="_blank" rel="noopener">
+            <img src="./img/DVRPCLogo.png" />
+        </a>
+        <span>
+            <h2>DVRPC Station Shed Explorer</h2>
+            <i class="material-icons" style="color: #0078AE;">info</i>
+        </span>
+        <form id="main-form">
+            <p>Search Stations:</p>
+            <select name='station'>
+                <!-- Build station/year query based on look up table -->
+                <option value="default" selected>Please Select a Station to Continue</option>
+            </select>
 
-                <input type='submit' value='Search'>
-            </form>
-        </nav>
+            <select name='year'>
+            </select>
 
-        <main role='main' id='map'>
-            <div class="legend__container">
-                <p class="legend__toggle">Click for More Information</p>
-                <div class="legend__body">
-                </div>
+            <input type='submit' value='Search'>
+        </form>
+    </nav>
+
+    <main role='main' id='map'>
+        <div class="legend__container">
+            <p class="legend__toggle">Click for More Information</p>
+            <div class="legend__body">
+                <span>
+                    <h2>Nothing to display!</h2>
+                    <h4>please conduct a search to continue</h4>
+                </span>
+                <img src="img/cat.gif" style="width: 20%;" />
             </div>
-        </main>
-    </body>
+        </div>
+    </main>
+</body>
+
 </html>

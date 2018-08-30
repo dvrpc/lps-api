@@ -20,10 +20,9 @@ const schemes = {
         'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
         'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
     },
-    'PennDOT': {
-        'Park and Ride': ['#08853e', '#99a7d3', '#5b70a8', '#063e7e']
-    },
-    'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
+    'DOT': {
+        'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
+},
 }
 
 const map = new mapboxgl.Map({
@@ -39,36 +38,19 @@ map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 /* BuildLegend(content)
 */
 const BuildLegend = (content, colorScheme) =>{
-
-    // content.range.sort((a,b) =>{
-    //     console.log({a})
-    //     console.log({b})
-    //     return a-b
-    // })
-    // let position = parseInt((content.range.length/4), 10)
-    // if (position == 0){
-    //     let position = 2
-    // }
-    // let max = Math.max.apply(null, content.range)
-    // let x = 0;
-    // while (x<4){
-    //     let index = x * position
-    //     x == 3 ? content.breaks.push(max) : content.breaks.push(content.range[index])
-    //     x++
-    // }
-    let temp = content.range.length>4 ? ckmeans(content.range, 4) : ckmeans(content.range, content.range.length)
+    // create classification
+    let temp = content.range.length>4 ? ckmeans(content.range, 4) : ckmeans(content.range, content.range.length) //ckmeans, simple-statistics library
     temp.forEach(cluster=>{
         let temp = { 'break': cluster[cluster.length-1], 'count': cluster.length}
         content.breaks.push(temp)
     })
-    console.log(content.breaks)
     
     const legendBody = document.querySelector(".legend__body")
     
     // numerical summaries
     legendBody.innerHTML = `
-    <h1 class="legend__emphasis">${content.name}</h1>
-    <div class="legend__summary-container">
+    <div class="legend__station-summary">
+        <h1 class="legend__emphasis">${content.name}</h1>
         <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station.</p>
     </div>
     <div class="legend__number-summary">
@@ -77,21 +59,24 @@ const BuildLegend = (content, colorScheme) =>{
             <p class="legend__text">Total Commuters</p>
         </div>
         <div class="legend__summary-container">
-            <p class="legend__emphasis summary">84</p>
-            <p class="legend__text">Distance</p>
+            <p class="legend__emphasis summary">${Math.floor((Math.random()*100))}</p>
+            <p class="legend__text">Average Miles Traveled</p>
         </div>
     </div>
-    <div class="legend__distribution-summary">
-    </div>`
+    <div class="legend__distribution-summary"></div>
+    `
+    // set colors appropriately based on operator/mode scheme system
     const emphasis = document.querySelectorAll(".legend__emphasis")
     emphasis.forEach(node=>{
         node.style.color = colorScheme[content.operator][content.mode][2]
     })
+
+    // create legend boxes
     let i = 0
     colorScheme[content.operator][content.mode].forEach(classification=>{
         const container = document.querySelector(".legend__distribution-summary")
         let legendItem = document.createElement("div")
-        let height = container.clientHeight/3
+        let height = document.querySelector('body').clientHeight*0.045
         if (i <2){
             legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; font-weight: 700`
         }
@@ -122,6 +107,8 @@ const BuildLegend = (content, colorScheme) =>{
         - L212
 */
 const HexStyling = (id, infoArray, colorScheme) => {
+
+    console.log({infoArray})
     if (infoArray.operator.length != 1) {
         return {
             'id': id,
@@ -238,74 +225,76 @@ form.onsubmit = e => {
         }
     })
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
-    fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
-        .then(response => {
-            if (response.status == 200) {
-                response.json()
-                    .then(jawn => {
-                        if (jawn.code) alert(jawn.error)
-                        else {
-                            // build your arcgis query parameter while making your db call 
-                            let fids = []
-                            for (let k in jawn) { fids.push(jawn[k].id) }
-                            // arcgis call
-                            // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
-                            fetch(
-                                `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&objectIds=${fids}&outFields=FID&outSR=4326&geometryPrecision=4&f=pgeojson`
-                            ).then(response => {
-                                if (response.ok) {
-                                    response.json().then(hexBins => {
-                                        // bind count data to arcgis response
-                                        // create a range array that can be used to calculate quartile classification break points
-                                        jawn.forEach(count => {
-                                            let features = hexBins.features
-                                            for (let i in features) {
-                                                if (features[i].properties.FID == count.id) {
-                                                    features[i].properties.count = count.count
-                                                    stationInfo['range'].push(count.count)
-                                                }
-                                            }
-                                        })
-                                        // stationInfo['breaks'] = Quartile(stationInfo['range']) // calculate classification break points
-                                        // throw some honeycombs on the map #saveTheBees
-                                        map.addSource('hexBins', {
-                                            type: 'geojson',
-                                            data: hexBins
-                                        })
-                                        BuildLegend(stationInfo, schemes)
-                                        map.addLayer(HexStyling('hexBins', stationInfo, schemes))
-
-                                            // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
-                                            fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=&objectIds=${fids}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
-                                                .then(response => {
-                                                    if (response.ok) {
-                                                        response.json()
-                                                            .then(extentReturn => {
-                                                                // calculate center???
-                                                                // @TODO: There has to be a better way to do this
-                                                                let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
-                                                                map.flyTo({
-                                                                    center: bounds,
-                                                                    zoom: 9,
-                                                                    speed: 0.3,
-                                                                })
-                                                            })
-                                                        }
-                                            })
-                                    })
+    if(station != 'default'){
+        fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
+            .then(response => {
+                if (response.status == 200) {
+                    response.json()
+                        .then(jawn => {
+                            if (jawn.code) alert(jawn.error)
+                            else {
+                                // build your arcgis query parameter while making your db call 
+                                let hex = '('
+                                for (let k in jawn) {
+                                    k==jawn.length-1 ? hex+= `'${jawn[k].id}')` : hex += `'${jawn[k].id}', `
                                 }
-                            }).catch(error => console.error(error))
-                        }
-                    })
-            }
-        }).catch(error => console.error(error))
+                                // arcgis call
+                                // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
+                                fetch(
+                                    `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=GRID_ID%20IN%20${hex}&outFields=GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson`
+                                ).then(response => {
+                                    if (response.ok) {
+                                        response.json().then(hexBins => {
+                                            // bind count data to arcgis response
+                                            // create a range array that can be used to calculate quartile classification break points
+                                            jawn.forEach(count => {
+                                                let features = hexBins.features
+                                                for (let i in features) {
+                                                    if (features[i].properties.GRID_ID == count.id) {
+                                                        features[i].properties.count = count.count
+                                                        stationInfo['range'].push(count.count)
+                                                    }
+                                                }
+                                            })
+                                            // throw some honeycombs on the map #saveTheBees
+                                            map.addSource('hexBins', {
+                                                type: 'geojson',
+                                                data: hexBins
+                                            })
+                                            BuildLegend(stationInfo, schemes)
+                                            map.addLayer(HexStyling('hexBins', stationInfo, schemes))
+
+                                                // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
+                                                fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=GRID_ID%20IN%20${hex}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
+                                                    .then(response => {
+                                                        if (response.ok) {
+                                                            response.json()
+                                                                .then(extentReturn => {
+                                                                    // calculate center???
+                                                                    // @TODO: There has to be a better way to do this
+                                                                    let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
+                                                                    map.flyTo({
+                                                                        center: bounds,
+                                                                        zoom: 9,
+                                                                        speed: 0.3,
+                                                                    })
+                                                                })
+                                                            }
+                                                })
+                                        })
+                                    }
+                                }).catch(error => console.error(error))
+                            }
+                        })
+                }
+            }).catch(error => console.error(error))
+    }
+    else{ alert('Please select a station to continue') }
 }
 
-
-let legendToggle = document.querySelector('.legend__toggle')
-legendToggle.addEventListener('click', e=>{
-    e.stopPropagation()
-    let body = legendToggle.nextElementSibling
+let toggle = document.querySelector('.legend__toggle')
+toggle.addEventListener('click', e=>{
+    e.preventDefault()
+    let body = e.target.nextElementSibling
     body.classList.toggle('visible')
-    body.classList.contains('visible') ? console.log('visible') : console.log('not visible')
 })
