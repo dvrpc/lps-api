@@ -158,7 +158,7 @@ const form = document.querySelector('#main-form')
 let data = undefined
 // populate dropdowns with possible query values
 // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
-fetch('http://localhost:8000/test')
+fetch('https://a.michaelruane.com/api/test')
     .then(response => {
         if (response.ok) {
             response.json()
@@ -226,7 +226,7 @@ form.onsubmit = e => {
     })
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
     if(station != 'default'){
-        fetch(`http://localhost:8000/query?station=${station}&year=${selectedYear}`)
+        fetch(`https://a.michaelruane.com/api/query?station=${station}&year=${selectedYear}`)
             .then(response => {
                 if (response.status == 200) {
                     response.json()
