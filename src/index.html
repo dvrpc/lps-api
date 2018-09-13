@@ -20,8 +20,7 @@
 
 <body>
     <nav>
-        <a href="https://www.dvrpc.org/" target="_blank" rel="noopener">
-            <img src="./img/DVRPCLogo.png" />
+        <a href="https://www.dvrpc.org/" target="_blank" rel="noopener" id='dvrpc-logo'>
         </a>
         <span>
             <h2>DVRPC Station Shed Explorer</h2>
@@ -35,6 +34,7 @@
             </select>
 
             <select name='year'>
+                <option value="default" selected>--</option>
             </select>
 
             <input type='submit' value='Search'>
@@ -43,13 +43,13 @@
 
     <main role='main' id='map'>
         <div class="legend__container">
-            <p class="legend__toggle">Click for More Information</p>
+            <p class="legend__toggle">Legend</p>
             <div class="legend__body">
                 <span>
                     <h2>Nothing to display!</h2>
                     <h4>please conduct a search to continue</h4>
                 </span>
-                <img src="img/cat.gif" style="width: 20%;" />
+                <span id='cat-loading'></span>
             </div>
         </div>
     </main>

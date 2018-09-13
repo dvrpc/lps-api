@@ -1,7 +1,10 @@
 var path = require('path'),
         HTMLWebpackPlugin = require('html-webpack-plugin'),
         ExtractTextPlugin = require('extract-text-webpack-plugin')
-
+        
+var extractPlugin = new ExtractTextPlugin({
+    filename: './bundle.styles.css'
+})
 module.exports = {
     entry: `./src/js/index.js`, // main JS file for application
     output: {
@@ -21,8 +24,12 @@ module.exports = {
             },
             // want to bundle your CSS files? i got u fam
             {
-                test: /\.css/,
-                loader: ['style-loader', 'css-loader']
+                test: /\.css$/,
+                use: ['style-loader', 'css-loader']
+            },
+            {
+                test: /\.(png|svg|jpg|gif)$/,
+                use: ['file-loader']
             }
         ]
     },
@@ -38,8 +45,6 @@ module.exports = {
             template: './src/index.html',
             hash: true
         }),
-        new ExtractTextPlugin({
-            filename: './bundle.styles.css'
-        })
+        extractPlugin
     ]
 };

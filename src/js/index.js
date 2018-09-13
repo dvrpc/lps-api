@@ -1,5 +1,7 @@
-import {ckmeans} from '../../node_modules/simple-statistics'
-
+import { ckmeans } from '../../node_modules/simple-statistics'
+import '../css/index.css'
+import Logo from '../img/DVRPCLogo.png'
+import Loading from '../img/cat.gif'
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
 // color schemes for each operator
 const schemes = {
@@ -22,9 +24,17 @@ const schemes = {
     },
     'DOT': {
         'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
-},
+    },
 }
+const logoContainer = document.querySelector('#dvrpc-logo')
+let logo = new Image()
+logo.src = Logo
+logoContainer.appendChild(logo)
 
+const loadingContainer = document.querySelector('#cat-loading')
+let loading = new Image()
+loading.src = Loading
+loadingContainer.appendChild(loading)
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
@@ -35,61 +45,19 @@ const map = new mapboxgl.Map({
 
 map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
-/* BuildLegend(content)
-*/
-const BuildLegend = (content, colorScheme) =>{
-    // create classification
-    let temp = content.range.length>4 ? ckmeans(content.range, 4) : ckmeans(content.range, content.range.length) //ckmeans, simple-statistics library
-    temp.forEach(cluster=>{
-        let temp = { 'break': cluster[cluster.length-1], 'count': cluster.length}
-        content.breaks.push(temp)
-    })
-    
-    const legendBody = document.querySelector(".legend__body")
-    
-    // numerical summaries
-    legendBody.innerHTML = `
-    <div class="legend__station-summary">
-        <h1 class="legend__emphasis">${content.name}</h1>
-        <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station.</p>
-    </div>
-    <div class="legend__number-summary">
-        <div class="legend__summary-container">
-            <p class="legend__emphasis summary">${content.range.reduce((a,b)=>a+b)}</p>
-            <p class="legend__text">Total Commuters</p>
-        </div>
-        <div class="legend__summary-container">
-            <p class="legend__emphasis summary">${Math.floor((Math.random()*100))}</p>
-            <p class="legend__text">Average Miles Traveled</p>
-        </div>
-    </div>
-    <div class="legend__distribution-summary"></div>
-    `
-    // set colors appropriately based on operator/mode scheme system
-    const emphasis = document.querySelectorAll(".legend__emphasis")
-    emphasis.forEach(node=>{
-        node.style.color = colorScheme[content.operator][content.mode][2]
-    })
-
-    // create legend boxes
-    let i = 0
-    colorScheme[content.operator][content.mode].forEach(classification=>{
-        const container = document.querySelector(".legend__distribution-summary")
-        let legendItem = document.createElement("div")
-        let height = document.querySelector('body').clientHeight*0.045
-        if (i <2){
-            legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; font-weight: 700`
+// try to work around arcgis 404 error
+fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
+    .then(response => {
+        if (response.ok) {
+            response.json()
+                .then(features => {
+                    map.addSource('hexBins', {
+                        type: 'geojson',
+                        data: features
+                    })
+                })
         }
-        else {
-            legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; color: white; font-weight: 700`
-        }
-        legendItem.innerHTML = `<p>${content.breaks[i]['break']}</p>`
-        container.appendChild(legendItem)
-        i ++
-    })
-}
-
-
+    }).catch(err => console.err('Error occured in ArcGIS fetch'))
 
 /* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
     @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
@@ -106,48 +74,121 @@ const BuildLegend = (content, colorScheme) =>{
     @usage:
         - L212
 */
-const HexStyling = (id, infoArray, colorScheme) => {
+const HexStyling = (infoArray, colorScheme, filter) => {
+    console.log({ infoArray })
+    console.log({ colorScheme })
+    console.log({ filter })
+    // sort object by counts
+    const SortObjectsByField = field => {
+        let sortOrder = 1
+        return (a, b) => {
+            let result = (a[field] < b[field]) ? -1 : (a[field] > b[field]) ? 1 : 0;
+            return result * sortOrder
+        }
+    }
+    const BuildLegend = (content, colorScheme) => {
+        let range = []
+        for (let i in content.data) {
+            range.push(content.data[i].count)
+        }
+        // create classification
+        let temp = range.length > 4 ? ckmeans(range, 4) : ckmeans(range, range.length) //ckmeans, simple-statistics library
+        temp.forEach(cluster => {
+            let temp = { 'break': [cluster[0], cluster[cluster.length - 1]], 'count': cluster.length, 'features': [] }
+            // push GRID_IDs into arrays corresponding to correct classification
+            for (let i in content.data) {
+                content.data[i].count >= temp.break[0] && content.data[i].count <= temp.break[1] ? temp.features.push(content.data[i].id) : undefined
+            }
+            content.breaks.push(temp)
+        })
+        const legendBody = document.querySelector(".legend__body")
 
-    console.log({infoArray})
+        // numerical summaries
+        legendBody.innerHTML = `
+        <div class="legend__station-summary">
+            <h1 class="legend__emphasis">${content.name}</h1>
+            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station.</p>
+        </div>
+        <div class="legend__number-summary">
+            <div class="legend__summary-container">
+                <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
+                <p class="legend__text">Total Commuters</p>
+            </div>
+            <div class="legend__summary-container">
+                <p class="legend__emphasis summary">${Math.floor((Math.random() * 100))}</p>
+                <p class="legend__text">Average Miles Traveled</p>
+            </div>
+        </div>
+        <div class="legend__distribution-summary"></div>
+        `
+        // set colors appropriately based on operator/mode scheme system
+        const emphasis = document.querySelectorAll(".legend__emphasis")
+        emphasis.forEach(node => {
+            node.style.color = colorScheme[content.operator][content.mode][2]
+        })
+
+        // create legend boxes
+        let i = 0
+        colorScheme[content.operator][content.mode].forEach(classification => {
+            const container = document.querySelector(".legend__distribution-summary")
+            let legendItem = document.createElement("div")
+            let height = document.querySelector('body').clientHeight * 0.045
+            if (i < 2) {
+                legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; font-weight: 700`
+            }
+            else {
+                legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; color: white; font-weight: 700`
+            }
+            legendItem.innerHTML = `<p>${content.breaks[i]['break'][1]}</p>`
+            container.appendChild(legendItem)
+            i++
+        })
+    }
+    const GenerateFillFunction = (infoArray, colorScheme) => {
+        let stops = []
+        Object.keys(infoArray.breaks).forEach(key => {
+            infoArray.breaks[key].features.forEach(feature => {
+                stops.push([feature, colorScheme[infoArray.operator][infoArray.mode][key]])
+            })
+        })
+        return stops
+    }
+
+
+    infoArray['data'].sort(SortObjectsByField('count'))
+    BuildLegend(infoArray, schemes)
     if (infoArray.operator.length != 1) {
+
         return {
-            'id': id,
+            'id': 'hexBins',
             'type': 'fill',
-            'source': id,
+            'source': 'hexBins',
+            'filter': ['match', ['get', 'GRID_ID'], filter, true, false],
             'paint': {
                 'fill-color': {
-                    property: 'count',
-                    type: 'interval',
-                    stops: [
-                        [infoArray.breaks[0]['break'], colorScheme[infoArray.operator][infoArray.mode][0]],
-                        [infoArray.breaks[1]['break'], colorScheme[infoArray.operator][infoArray.mode][1]],
-                        [infoArray.breaks[2]['break'], colorScheme[infoArray.operator][infoArray.mode][2]],
-                        [infoArray.breaks[3]['break'], colorScheme[infoArray.operator][infoArray.mode][3]]
-                    ]
+                    property: 'GRID_ID',
+                    type: 'categorical',
+                    default: '#ccc',
+                    stops: GenerateFillFunction(infoArray, colorScheme)
                 },
-                'fill-outline-color': 'rgba(0,0,0,.75)',
-                'fill-opacity': .75
+                'fill-outline-color': '#888'
             }
         }
     }
     else {
         return {
-            'id': id,
+            'id': 'hexBins',
             'type': 'fill',
-            'source': id,
+            'source': 'hexBins',
+            'filter': ['match', ['get', 'GRID_ID'], filter, true, false],
             'paint': {
                 'fill-color': {
-                    property: 'count',
-                    type: 'interval',
-                    stops: [
-                        [infoArray.breaks[0]['break'], colorScheme[infoArray[infoArray.operator]][0]],
-                        [infoArray.breaks[1]['break'], colorScheme[infoArray[infoArray.operator]][1]],
-                        [infoArray.breaks[2]['break'], colorScheme[infoArray[infoArray.operator]][2]],
-                        [infoArray.breaks[3]['break'], colorScheme[infoArray[infoArray.operator]][3]]
-                    ]
+                    property: 'GRID_ID',
+                    type: 'categorical',
+                    default: '#ccc',
+                    stops: GenerateFillFunction(infoArray, colorScheme)
                 },
-                'fill-outline-color': 'rgba(0,0,0,.75)',
-                'fill-opacity': .75
+                'fill-outline-color': '#666'
             }
         }
     }
@@ -201,9 +242,8 @@ form.onsubmit = e => {
     e.preventDefault()
 
     // check if a layer exists on the map already & remove it (map.removeSource())
-    if (map.getSource('hexBins')) {
+    if (map.getLayer('hexBins')) {
         map.removeLayer('hexBins')
-        map.removeSource('hexBins')
     }
     let station = e.target[0].value,
         selectedYear = e.target[1].value
@@ -213,7 +253,7 @@ form.onsubmit = e => {
         'name': station,
         'operator': undefined,
         'mode': undefined,
-        'range': [],
+        'data': [],
         'breaks': []
     }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
@@ -225,7 +265,7 @@ form.onsubmit = e => {
         }
     })
     // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
-    if(station != 'default'){
+    if (station != 'default') {
         fetch(`https://a.michaelruane.com/api/query?station=${station}&year=${selectedYear}`)
             .then(response => {
                 if (response.status == 200) {
@@ -233,67 +273,32 @@ form.onsubmit = e => {
                         .then(jawn => {
                             if (jawn.code) alert(jawn.error)
                             else {
-                                // build your arcgis query parameter while making your db call 
-                                let hex = '('
+                                // create filter array for hex tile
+                                let hex = []
                                 for (let k in jawn) {
-                                    k==jawn.length-1 ? hex+= `'${jawn[k].id}')` : hex += `'${jawn[k].id}', `
+                                    hex.push(jawn[k].id)
+                                    stationInfo['data'].push({
+                                        'id': jawn[k].id,
+                                        'count': jawn[k].count
+                                    })
                                 }
-                                // arcgis call
-                                // KNOWN BUG: Queries that return a lot of features receive a 404 error (known stations: Lindenwold, Ferry Avenue, Trenton, Woodcrest)
-                                fetch(
-                                    `https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=GRID_ID%20IN%20${hex}&outFields=GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson`
-                                ).then(response => {
-                                    if (response.ok) {
-                                        response.json().then(hexBins => {
-                                            // bind count data to arcgis response
-                                            // create a range array that can be used to calculate quartile classification break points
-                                            jawn.forEach(count => {
-                                                let features = hexBins.features
-                                                for (let i in features) {
-                                                    if (features[i].properties.GRID_ID == count.id) {
-                                                        features[i].properties.count = count.count
-                                                        stationInfo['range'].push(count.count)
-                                                    }
-                                                }
-                                            })
-                                            // throw some honeycombs on the map #saveTheBees
-                                            map.addSource('hexBins', {
-                                                type: 'geojson',
-                                                data: hexBins
-                                            })
-                                            BuildLegend(stationInfo, schemes)
-                                            map.addLayer(HexStyling('hexBins', stationInfo, schemes))
+                                // filter tile
+                                // hex.length != 0 ? map.setFilter('hexBins', ['match', ['get', 'GRID_ID'], hex, true, false]) : map.setFilter('hexBins', ['==', ['get', 'GRID_ID'], ''])
 
-                                                // @TODO: Get bounds of ArcGIS response and adjust map extent accordingly
-                                                fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=GRID_ID%20IN%20${hex}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
-                                                    .then(response => {
-                                                        if (response.ok) {
-                                                            response.json()
-                                                                .then(extentReturn => {
-                                                                    // calculate center???
-                                                                    // @TODO: There has to be a better way to do this
-                                                                    let bounds = [(extentReturn.extent.xmin + ((extentReturn.extent.xmax - extentReturn.extent.xmin) / 2)), (extentReturn.extent.ymin + ((extentReturn.extent.ymax - extentReturn.extent.ymin) / 2))]
-                                                                    map.flyTo({
-                                                                        center: bounds,
-                                                                        zoom: 9,
-                                                                        speed: 0.3,
-                                                                    })
-                                                                })
-                                                            }
-                                                })
-                                        })
-                                    }
-                                }).catch(error => console.error(error))
+                                // style
+                                if (map.getSource('hexBins')) {
+                                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
+                                }
                             }
                         })
                 }
             }).catch(error => console.error(error))
     }
-    else{ alert('Please select a station to continue') }
+    else { alert('Please select a station to continue') }
 }
 
 let toggle = document.querySelector('.legend__toggle')
-toggle.addEventListener('click', e=>{
+toggle.addEventListener('click', e => {
     e.preventDefault()
     let body = e.target.nextElementSibling
     body.classList.toggle('visible')
