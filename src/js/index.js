@@ -75,9 +75,6 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
         - L212
 */
 const HexStyling = (infoArray, colorScheme, filter) => {
-    console.log({infoArray})
-    console.log({colorScheme})
-    console.log({filter})
     // sort object by counts
     const SortObjectsByField = field => {
         let sortOrder = 1
@@ -157,13 +154,36 @@ const HexStyling = (infoArray, colorScheme, filter) => {
 
 
     const GenerateFillFunction = (infoArray, colorScheme) => {
-        let stops = []
+        let info = {
+            query: `GRID_ID%20IN%20(`,
+            stops: []
+        }
         Object.keys(infoArray.breaks).forEach(key => {
             infoArray.breaks[key].features.forEach(feature => {
-                stops.push([feature, colorScheme[infoArray.operator][infoArray.mode][key]])
+                info.stops.push([feature, colorScheme[infoArray.operator][infoArray.mode][key]])
             })
         })
-        return stops
+        let i = 1
+        infoArray.data.forEach(feature=>{
+            i != infoArray.data.length ? info.query = `${info.query} '${feature.id}',` : info.query = `${info.query} '${feature.id}')`
+            i ++
+        })
+        // @TODO: Improve on this. Running into that AGO 404 error when retreiving bounds because it's acting like some of the geographies don't exist. 
+        fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=${info.query}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
+        .then(response=>{
+            if (response.ok){
+                response.json().then(data=>{
+                    let bounds = [(data.extent.xmin + ((data.extent.xmax - data.extent.xmin) / 2)), (data.extent.ymin + ((data.extent.ymax - data.extent.ymin) / 2))]
+                    map.flyTo({
+                        center: bounds,
+                        zoom: 9,
+                        speed: 0.3,
+                    })
+                })
+            }
+            
+        })
+        return info.stops
     }
 
 
@@ -210,7 +230,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
 const form = document.querySelector('#main-form')
 let data = undefined
 // populate dropdowns with possible query values
-// @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
 fetch('https://a.michaelruane.com/api/test')
     .then(response => {
         if (response.ok) {
@@ -276,7 +295,6 @@ form.onsubmit = e => {
             mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
         }
     })
-    // @NOTE: only works locally, on rbeatty's machine. He holds the keys to the castle.
     if (station != 'default') {
         fetch(`https://a.michaelruane.com/api/query?station=${station}&year=${selectedYear}`)
             .then(response => {
@@ -298,6 +316,7 @@ form.onsubmit = e => {
                                 if (map.getSource('hexBins')) {
                                     map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
                                 }
+                                
                             }
                         })
                 }
