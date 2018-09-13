@@ -75,9 +75,9 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
         - L212
 */
 const HexStyling = (infoArray, colorScheme, filter) => {
-    console.log({ infoArray })
-    console.log({ colorScheme })
-    console.log({ filter })
+    console.log({infoArray})
+    console.log({colorScheme})
+    console.log({filter})
     // sort object by counts
     const SortObjectsByField = field => {
         let sortOrder = 1
@@ -86,13 +86,19 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             return result * sortOrder
         }
     }
+
+
     const BuildLegend = (content, colorScheme) => {
         let range = []
         for (let i in content.data) {
             range.push(content.data[i].count)
         }
+
         // create classification
-        let temp = range.length > 4 ? ckmeans(range, 4) : ckmeans(range, range.length) //ckmeans, simple-statistics library
+        const GetUniqueCount = (value, index, self) =>{
+            return self.indexOf(value) === index
+        }
+        let temp = range.filter(GetUniqueCount).length > 4 ? ckmeans(range, 4) : ckmeans(range, range.filter(GetUniqueCount).length) //ckmeans, simple-statistics library
         temp.forEach(cluster => {
             let temp = { 'break': [cluster[0], cluster[cluster.length - 1]], 'count': cluster.length, 'features': [] }
             // push GRID_IDs into arrays corresponding to correct classification
@@ -121,6 +127,8 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         </div>
         <div class="legend__distribution-summary"></div>
         `
+    
+
         // set colors appropriately based on operator/mode scheme system
         const emphasis = document.querySelectorAll(".legend__emphasis")
         emphasis.forEach(node => {
@@ -139,11 +147,15 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             else {
                 legendItem.style.cssText = `width: ${height}px; height: ${height}px; background-color: ${classification}; color: white; font-weight: 700`
             }
-            legendItem.innerHTML = `<p>${content.breaks[i]['break'][1]}</p>`
-            container.appendChild(legendItem)
+            if (content.breaks[i]){
+                legendItem.innerHTML = `<p>${content.breaks[i]['break'][1]}</p>`
+                container.appendChild(legendItem)
+            }
             i++
         })
     }
+
+
     const GenerateFillFunction = (infoArray, colorScheme) => {
         let stops = []
         Object.keys(infoArray.breaks).forEach(key => {
@@ -282,9 +294,6 @@ form.onsubmit = e => {
                                         'count': jawn[k].count
                                     })
                                 }
-                                // filter tile
-                                // hex.length != 0 ? map.setFilter('hexBins', ['match', ['get', 'GRID_ID'], hex, true, false]) : map.setFilter('hexBins', ['==', ['get', 'GRID_ID'], ''])
-
                                 // style
                                 if (map.getSource('hexBins')) {
                                     map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
