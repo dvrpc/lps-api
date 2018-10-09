@@ -43,6 +43,14 @@ const map = new mapboxgl.Map({
     zoom: 12 // or whatever zoom you want
 });
 
+const ref = new mapboxgl.Map({
+    container: 'reference',
+    style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
+    center: [-75.14, 39.95],
+    zoom: 8,
+    interactive: false
+})
+
 map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
 // try to work around arcgis 404 error
@@ -54,6 +62,20 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                     map.addSource('hexBins', {
                         type: 'geojson',
                         data: features
+                    })
+                    ref.addSource('hexBins', {
+                        type: 'geojson',
+                        data: features
+                    })
+                }).then(x=>{
+                    // console.log(ref.getStyle())
+                    ref.addLayer({
+                        'id': 'hexBins',
+                        'source': 'hexBins',
+                        'type': 'fill',
+                        'paint': {
+                            'fill-opacity': 0
+                        }
                     })
                 })
         }
@@ -230,7 +252,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
 const form = document.querySelector('#main-form')
 let data = undefined
 // populate dropdowns with possible query values
-fetch('https://a.michaelruane.com/api/test')
+fetch('https://a.michaelruane.com/api/lps/test')
     .then(response => {
         if (response.ok) {
             response.json()
@@ -296,7 +318,7 @@ form.onsubmit = e => {
         }
     })
     if (station != 'default') {
-        fetch(`https://a.michaelruane.com/api/query?station=${station}&year=${selectedYear}`)
+        fetch(`https://a.michaelruane.com/api/lps/query?station=${station}&year=${selectedYear}`)
             .then(response => {
                 if (response.status == 200) {
                     response.json()
@@ -315,12 +337,23 @@ form.onsubmit = e => {
                                 // style
                                 if (map.getSource('hexBins')) {
                                     map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
-                                }
-                                
+                                }                                
                             }
                         })
                 }
-            }).catch(error => console.error(error))
+            }).then(rendered=>{
+                if(map.getLayer('hexBins')){
+                    console.log(map)
+                    let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
+                    test.forEach(feature=>{
+                        console.log(feature._vectorTileFeature._geometry)
+                    })
+                }
+                else{
+                    console.log('stylesheet, ', map.getStyle())
+                }
+            })
+            .catch(error => console.error(error))
     }
     else { alert('Please select a station to continue') }
 }

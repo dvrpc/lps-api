@@ -15,7 +15,7 @@ module.exports = {
         rules : [
             // write code for the future, but make it compatible for the past
             {
-                test: /\.js$/,
+                test: /\.(js|json)$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
