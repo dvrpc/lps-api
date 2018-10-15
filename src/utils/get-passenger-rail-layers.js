@@ -8,7 +8,8 @@ export const getRailLayer = (lineName, lineColor) => {
         paint: {
         "line-color": lineColor,
         "line-width":['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
-        "line-opacity": .75
+        "line-opacity": .75,
+        "line-dasharray": [2,2]
         }
     }
 }

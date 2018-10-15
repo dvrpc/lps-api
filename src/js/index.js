@@ -122,7 +122,7 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                 "text-halo-blur": 3
             },
         }
-        map.addLayer(layerDef)
+        map.addLayer(layerDef, 'road-label-small')
 
     }).catch(err => console.err('Error occured in ArcGIS fetch'))
 
@@ -184,10 +184,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             <div class="legend__summary-container">
                 <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
                 <p class="legend__text">Total Commuters</p>
-            </div>
-            <div class="legend__summary-container">
-                <p class="legend__emphasis summary">${Math.floor((Math.random() * 100))}</p>
-                <p class="legend__text">Average Miles Traveled</p>
             </div>
         </div>
         <div class="legend__distribution-summary"></div>
@@ -379,7 +375,7 @@ form.onsubmit = e => {
                 }
                 // style
                 if (map.getSource('hexBins')) {
-                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
+                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'railLabels')
 
                     // use the existing schemes to set station line colors
                     const operator = stationInfo.operator
