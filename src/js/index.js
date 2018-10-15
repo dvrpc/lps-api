@@ -1,5 +1,6 @@
 import { ckmeans } from '../../node_modules/simple-statistics'
 import '../css/index.css'
+import { getRailLayer } from '../utils/get-passenger-rail-layers.js'
 import Logo from '../img/DVRPCLogo.png'
 import Loading from '../img/cat.gif'
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
@@ -68,7 +69,6 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                         data: features
                     })
                 }).then(x=>{
-                    // console.log(ref.getStyle())
                     ref.addLayer({
                         'id': 'hexBins',
                         'source': 'hexBins',
@@ -79,7 +79,53 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                     })
                 })
         }
+        // add passenger rail source
+        map.addSource('passengerRailLines', {
+            type: 'geojson',
+            data: 'https://opendata.arcgis.com/datasets/5af7a3e9c0f34a7f93ac8935cb6cae3b_0.geojson'
+        })
+        let layerDef = {
+            "id": "railLabels",
+            "type": "symbol",
+            "source": "passengerRailLines",
+            "filter": ['match', ['get', 'LINE_NAME'], "", true, false],
+            "layout": {
+              "text-field": "{LINE_NAME}",
+              "text-font": [
+                "Montserrat SemiBold",
+                  "Open Sans Semibold"
+                ],
+                "text-size": [
+                  'interpolate', ['linear'], ['zoom'],
+                  8, 8,
+                  12, 14
+                ],
+                "symbol-placement":  "line"
+            },
+            "paint": {
+              "text-color": '#fff',
+                "text-halo-color": [
+                    'match',
+                    ['get', 'TYPE'],
+                    'AMTRAK', '#004d6e',
+                    'NJ Transit', "#f18541",
+                    'NJ Transit Light Rail', '#ffc424',
+                    'PATCO', '#ed164b',
+                    'Rapid Transit', '#9e3e97',
+                    'Regional Rail', '#487997',
+                    'Subway', '#f58221',
+                    'Subway - Elevated', '#067dc1',
+                    'Surface Trolley',  '#529442',
+                    '#323232'
+                  ],
+                "text-halo-width": 2,
+                "text-halo-blur": 3
+            },
+        }
+        map.addLayer(layerDef, 'road-label-small')
+
     }).catch(err => console.err('Error occured in ArcGIS fetch'))
+
 
 /* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
     @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
@@ -97,6 +143,7 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
         - L212
 */
 const HexStyling = (infoArray, colorScheme, filter) => {
+
     // sort object by counts
     const SortObjectsByField = field => {
         let sortOrder = 1
@@ -105,7 +152,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             return result * sortOrder
         }
     }
-
 
     const BuildLegend = (content, colorScheme) => {
         let range = []
@@ -138,10 +184,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             <div class="legend__summary-container">
                 <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
                 <p class="legend__text">Total Commuters</p>
-            </div>
-            <div class="legend__summary-container">
-                <p class="legend__emphasis summary">${Math.floor((Math.random() * 100))}</p>
-                <p class="legend__text">Average Miles Traveled</p>
             </div>
         </div>
         <div class="legend__distribution-summary"></div>
@@ -250,7 +292,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
 
 // function to get station sheds hexagons on submit
 const form = document.querySelector('#main-form')
-let data = undefined
+let data = new Object();
 // populate dropdowns with possible query values
 fetch('https://a.michaelruane.com/api/lps/test')
     .then(response => {
@@ -265,17 +307,12 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         }
                         // get the new station value
                         let station = e.target.value
-
                         // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
-                        jawn.forEach(feature => {
-                            if (feature[station]) {
-                                feature[station]['years'].forEach(year => {
-                                    let option = document.createElement('option')
-                                    option.value = year
-                                    option.innerText = year
-                                    form[1].appendChild(option)
-                                })
-                            }
+                        data[station]['years'].forEach(year => {
+                            let option = document.createElement('option')
+                            option.value = year
+                            option.innerText = year
+                            form[1].appendChild(option)
                         })
                     })
                     // loop through stations and create a dropdown option for each one
@@ -285,8 +322,9 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         option.value = k
                         option.innerText = k
                         form[0].appendChild(option)
+                        data[k] = station[k]
                     })
-                    return data = jawn
+                    return data
                 })
         }
     })
@@ -294,9 +332,12 @@ fetch('https://a.michaelruane.com/api/lps/test')
 form.onsubmit = e => {
     e.preventDefault()
 
-    // check if a layer exists on the map already & remove it (map.removeSource())
+    // check if a layer exists on the map already & remove it
     if (map.getLayer('hexBins')) {
         map.removeLayer('hexBins')
+    }
+    if (map.getLayer('railLayer')) {
+        map.removeLayer('railLayer')
     }
     let station = e.target[0].value,
         selectedYear = e.target[1].value
@@ -310,50 +351,55 @@ form.onsubmit = e => {
         'breaks': []
     }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
-    data.forEach(i => {
-        if (i[station]) {
-            stationInfo['operator'] = i[station].operator
-            let mode = i[station].mode
-            mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
-        }
-    })
+    stationInfo['operator'] = data[station].operator
+    let mode = data[station].mode
+    stationInfo['line'] = data[station].line
+    mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
+
     if (station != 'default') {
         fetch(`https://a.michaelruane.com/api/lps/query?station=${station}&year=${selectedYear}`)
-            .then(response => {
-                if (response.status == 200) {
-                    response.json()
-                        .then(jawn => {
-                            if (jawn.code) alert(jawn.error)
-                            else {
-                                // create filter array for hex tile
-                                let hex = []
-                                for (let k in jawn) {
-                                    hex.push(jawn[k].id)
-                                    stationInfo['data'].push({
-                                        'id': jawn[k].id,
-                                        'count': jawn[k].count
-                                    })
-                                }
-                                // style
-                                if (map.getSource('hexBins')) {
-                                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
-                                }                                
-                            }
-                        })
-                }
-            }).then(rendered=>{
-                if(map.getLayer('hexBins')){
-                    console.log(map)
-                    let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
-                    test.forEach(feature=>{
-                        console.log(feature._vectorTileFeature._geometry)
+        .then(response => {
+            if (response.status == 200) { return response.json() }
+        })
+        .then(jawn => {
+            if (jawn.code) alert(jawn.error)
+            else {
+                // create filter array for hex tile
+                let hex = []
+                for (let k in jawn) {
+                    hex.push(jawn[k].id)
+                    stationInfo['data'].push({
+                        'id': jawn[k].id,
+                        'count': jawn[k].count
                     })
                 }
-                else{
-                    console.log('stylesheet, ', map.getStyle())
+                // style
+                if (map.getSource('hexBins')) {
+                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'railLabels')
+
+                    // use the existing schemes to set station line colors
+                    const operator = stationInfo.operator
+                    const mode = stationInfo.mode
+                    const lineColor = schemes[operator][mode][3]
+
+                    // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
+                    const lineName = stationInfo.line
+                    const railLayer = getRailLayer(lineName, lineColor)
+                    map.addLayer(railLayer, 'railLabels')
+                    map.setFilter('railLabels', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                 }
-            })
-            .catch(error => console.error(error))
+            }
+        })
+        .then(rendered=>{
+            if(map.getLayer('hexBins')){
+                let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
+                test.forEach(feature=>{
+                })
+            }
+            else{
+            }
+        })
+        .catch(error => console.error(error))
     }
     else { alert('Please select a station to continue') }
 }
