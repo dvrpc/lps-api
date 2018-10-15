@@ -1,4 +1,5 @@
 export const getRailLayer = (lineName, lineColor) => {
+    console.log({lineName})
     return {
         id: 'railLayer',
         type: 'line',

@@ -1,0 +1,43 @@
+{
+    "version": 8,
+    "name": "lps-test",
+    
+    "center": [
+        -74.9056907662051,
+        40.21678268816336
+    ],
+    "zoom": 8,
+    "bearing": 0,
+    "pitch": 0,
+    "sources": {
+        
+        "hex-ref": {
+            "url": "https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson",
+            "type": "geojson"
+        }
+        
+    },
+    "transition": {
+      "duration": 300,
+      "delay": 0
+    },
+    "layers": [
+        
+        {
+            "interactive": true,
+            "layout": {
+                "visibility": "visible"
+            },
+            "type": "fill",
+            "source": "hex-ref",
+            "id": "hex-geom-ref"       
+            
+        }
+        
+    ],
+    "created": "2016-02-02T16:40:00.364Z",
+    "id": "cik5ms8hp002p04ly651sqxkm",
+    "modified": "2016-02-03T14:55:16.806Z",
+    "owner": "mruane",
+    "draft": false
+}

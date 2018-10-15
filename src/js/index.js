@@ -69,7 +69,6 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                         data: features
                     })
                 }).then(x=>{
-                    // console.log(ref.getStyle())
                     ref.addLayer({
                         'id': 'hexBins',
                         'source': 'hexBins',
@@ -258,7 +257,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
 
 // function to get station sheds hexagons on submit
 const form = document.querySelector('#main-form')
-let data = undefined
+let data = new Object();
 // populate dropdowns with possible query values
 fetch('https://a.michaelruane.com/api/lps/test')
     .then(response => {
@@ -273,17 +272,12 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         }
                         // get the new station value
                         let station = e.target.value
-
                         // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
-                        jawn.forEach(feature => {
-                            if (feature[station]) {
-                                feature[station]['years'].forEach(year => {
-                                    let option = document.createElement('option')
-                                    option.value = year
-                                    option.innerText = year
-                                    form[1].appendChild(option)
-                                })
-                            }
+                        data[station]['years'].forEach(year => {
+                            let option = document.createElement('option')
+                            option.value = year
+                            option.innerText = year
+                            form[1].appendChild(option)
                         })
                     })
                     // loop through stations and create a dropdown option for each one
@@ -293,8 +287,9 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         option.value = k
                         option.innerText = k
                         form[0].appendChild(option)
+                        data[k] = station[k]
                     })
-                    return data = jawn
+                    return data
                 })
         }
     })
@@ -321,61 +316,54 @@ form.onsubmit = e => {
         'breaks': []
     }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
-    data.forEach(i => {
-        if (i[station]) {
-            stationInfo['operator'] = i[station].operator
-            let mode = i[station].mode
-            mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
-        }
-    })
+    stationInfo['operator'] = data[station].operator
+    let mode = data[station].mode
+    stationInfo['line'] = data[station].line
+    mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
+
     if (station != 'default') {
         fetch(`https://a.michaelruane.com/api/lps/query?station=${station}&year=${selectedYear}`)
-            .then(response => {
-                if (response.status == 200) {
-                    response.json()
-                        .then(jawn => {
-                            if (jawn.code) alert(jawn.error)
-                            else {
-                                // create filter array for hex tile
-                                let hex = []
-                                for (let k in jawn) {
-                                    hex.push(jawn[k].id)
-                                    stationInfo['data'].push({
-                                        'id': jawn[k].id,
-                                        'count': jawn[k].count
-                                    })
-                                }
-                                // style
-                                if (map.getSource('hexBins')) {
-                                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
-
-                                    // use the existing schemes to set station line colors
-                                    const operator = stationInfo.operator
-                                    const mode = stationInfo.mode
-                                    const lineColor = schemes[operator][mode][3]
-
-                                    // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
-                                    const lineName = 'Lansdale/Doylestown Line'
-                                    const railLayer = getRailLayer(lineName, lineColor)
-                                    map.addLayer(railLayer)                            
-                                }
-                            }
-                        })
-                }
-            }).then(rendered=>{
-                
-                if(map.getLayer('hexBins')){
-                    console.log(map)
-                    let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
-                    test.forEach(feature=>{
-                        console.log(feature._vectorTileFeature._geometry)
+        .then(response => {
+            if (response.status == 200) { return response.json() }
+        })
+        .then(jawn => {
+            if (jawn.code) alert(jawn.error)
+            else {
+                // create filter array for hex tile
+                let hex = []
+                for (let k in jawn) {
+                    hex.push(jawn[k].id)
+                    stationInfo['data'].push({
+                        'id': jawn[k].id,
+                        'count': jawn[k].count
                     })
                 }
-                else{
-                    console.log('stylesheet, ', map.getStyle())
+                // style
+                if (map.getSource('hexBins')) {
+                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
+
+                    // use the existing schemes to set station line colors
+                    const operator = stationInfo.operator
+                    const mode = stationInfo.mode
+                    const lineColor = schemes[operator][mode][3]
+
+                    // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
+                    const lineName = stationInfo.line
+                    const railLayer = getRailLayer(lineName, lineColor)
+                    map.addLayer(railLayer)                            
                 }
-            })
-            .catch(error => console.error(error))
+            }
+        })
+        .then(rendered=>{
+            if(map.getLayer('hexBins')){
+                let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
+                test.forEach(feature=>{
+                })
+            }
+            else{
+            }
+        })
+        .catch(error => console.error(error))
     }
     else { alert('Please select a station to continue') }
 }
