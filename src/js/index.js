@@ -84,6 +84,45 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
             type: 'geojson',
             data: 'https://opendata.arcgis.com/datasets/5af7a3e9c0f34a7f93ac8935cb6cae3b_0.geojson'
         })
+        let layerDef = {
+            "id": "railLabels",
+            "type": "symbol",
+            "source": "passengerRailLines",
+            "filter": ['match', ['get', 'LINE_NAME'], "", true, false],
+            "layout": {
+              "text-field": "{LINE_NAME}",
+              "text-font": [
+                "Montserrat SemiBold",
+                  "Open Sans Semibold"
+                ],
+                "text-size": [
+                  'interpolate', ['linear'], ['zoom'],
+                  8, 8,
+                  12, 14
+                ],
+                "symbol-placement":  "line"
+            },
+            "paint": {
+              "text-color": '#fff',
+                "text-halo-color": [
+                    'match',
+                    ['get', 'TYPE'],
+                    'AMTRAK', '#004d6e',
+                    'NJ Transit', "#f18541",
+                    'NJ Transit Light Rail', '#ffc424',
+                    'PATCO', '#ed164b',
+                    'Rapid Transit', '#9e3e97',
+                    'Regional Rail', '#487997',
+                    'Subway', '#f58221',
+                    'Subway - Elevated', '#067dc1',
+                    'Surface Trolley',  '#529442',
+                    '#323232'
+                  ],
+                "text-halo-width": 2,
+                "text-halo-blur": 3
+            },
+        }
+        map.addLayer(layerDef)
 
     }).catch(err => console.err('Error occured in ArcGIS fetch'))
 
@@ -350,7 +389,8 @@ form.onsubmit = e => {
                     // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
                     const lineName = stationInfo.line
                     const railLayer = getRailLayer(lineName, lineColor)
-                    map.addLayer(railLayer)                            
+                    map.addLayer(railLayer, 'railLabels')
+                    map.setFilter('railLabels', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                 }
             }
         })

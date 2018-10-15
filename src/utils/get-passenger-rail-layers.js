@@ -7,7 +7,8 @@ export const getRailLayer = (lineName, lineColor) => {
         filter: ['match', ['get', 'LINE_NAME'], lineName, true, false],
         paint: {
         "line-color": lineColor,
-        "line-width":['interpolate', ['linear'], ['zoom'], 8, 1, 12, 3]
+        "line-width":['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
+        "line-opacity": .75
         }
     }
 }
