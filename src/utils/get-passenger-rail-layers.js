@@ -1,22 +1,11 @@
-export const getRailLayer = operator => {
+export const getRailLayer = (lineName, lineColor) => {
     return {
-        id: operator,
-        type: 'fill',
+        id: 'railLayer',
+        type: 'line',
         source: 'passengerRailLines',
+        filter: ['match', ['get', 'LINE_NAME'], lineName, true, false],
         paint: {
-        "line-color": [
-            // ['match', ['get', 'LINE_NAME'], operator, true, false],
-            'AMTRAK', '#004d6e',
-            'NJ Transit', "#f18541",
-            'NJ Transit Light Rail', '#ffc424',
-            'PATCO', '#ed164b',
-            'Rapid Transit', '#9e3e97',
-            'Regional Rail', '#487997',
-            'Subway', '#f58221',
-            'Subway - Elevated', '#067dc1',
-            'Surface Trolley',  '#529442',
-            '#323232'
-        ],
+        "line-color": lineColor,
         "line-width":['interpolate', ['linear'], ['zoom'], 8, 1, 12, 3]
         }
     }

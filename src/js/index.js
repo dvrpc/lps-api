@@ -1,5 +1,6 @@
 import { ckmeans } from '../../node_modules/simple-statistics'
 import '../css/index.css'
+import { getRailLayer } from '../utils/get-passenger-rail-layers.js'
 import Logo from '../img/DVRPCLogo.png'
 import Loading from '../img/cat.gif'
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
@@ -79,7 +80,14 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                     })
                 })
         }
+        // add passenger rail source
+        map.addSource('passengerRailLines', {
+            type: 'geojson',
+            data: 'https://opendata.arcgis.com/datasets/5af7a3e9c0f34a7f93ac8935cb6cae3b_0.geojson'
+        })
+
     }).catch(err => console.err('Error occured in ArcGIS fetch'))
+
 
 /* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
     @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
@@ -97,6 +105,7 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
         - L212
 */
 const HexStyling = (infoArray, colorScheme, filter) => {
+
     // sort object by counts
     const SortObjectsByField = field => {
         let sortOrder = 1
@@ -105,7 +114,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             return result * sortOrder
         }
     }
-
 
     const BuildLegend = (content, colorScheme) => {
         let range = []
@@ -294,9 +302,12 @@ fetch('https://a.michaelruane.com/api/lps/test')
 form.onsubmit = e => {
     e.preventDefault()
 
-    // check if a layer exists on the map already & remove it (map.removeSource())
+    // check if a layer exists on the map already & remove it
     if (map.getLayer('hexBins')) {
         map.removeLayer('hexBins')
+    }
+    if (map.getLayer('railLayer')) {
+        map.removeLayer('railLayer')
     }
     let station = e.target[0].value,
         selectedYear = e.target[1].value
@@ -337,11 +348,22 @@ form.onsubmit = e => {
                                 // style
                                 if (map.getSource('hexBins')) {
                                     map.addLayer(HexStyling(stationInfo, schemes, hex), 'road-label-small')
-                                }                                
+
+                                    // use the existing schemes to set station line colors
+                                    const operator = stationInfo.operator
+                                    const mode = stationInfo.mode
+                                    const lineColor = schemes[operator][mode][3]
+
+                                    // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
+                                    const lineName = 'Lansdale/Doylestown Line'
+                                    const railLayer = getRailLayer(lineName, lineColor)
+                                    map.addLayer(railLayer)                            
+                                }
                             }
                         })
                 }
             }).then(rendered=>{
+                
                 if(map.getLayer('hexBins')){
                     console.log(map)
                     let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
