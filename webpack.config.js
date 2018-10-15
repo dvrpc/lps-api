@@ -26,10 +26,20 @@ module.exports = {
             // want to bundle your CSS files? i got u fam
             {
                 test: /\.css/,
-                use: extract.extract({
+                use: extractPlugin.extract({
                     fallback: 'style-loader',
                     use: ['css-loader']
                 })
+            },
+            {
+                test: /\.(png|gif)$/,
+                use: [{
+                    loader: "file-loader",
+                    options: {
+                        name: "img/[name].[ext]",
+                        limit: 1000
+                    }
+                }]
             }
         ]
     },
