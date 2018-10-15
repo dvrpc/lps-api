@@ -1,15 +1,23 @@
 var path = require('path'),
         HTMLWebpackPlugin = require('html-webpack-plugin'),
         ExtractTextPlugin = require('extract-text-webpack-plugin')
+<<<<<<< HEAD
         
 var extractPlugin = new ExtractTextPlugin({
     filename: './bundle.styles.css'
 })
+=======
+
+    let extract = new ExtractTextPlugin({
+        filename: './bundle.styles.css'
+    })
+>>>>>>> webpack config
 module.exports = {
-    entry: `./src/js/index.js`, // main JS file for application
+    context: path.resolve(__dirname, 'src'),
+    entry: `./js/index.js`, // main JS file for application
     output: {
         path: `${__dirname}/dist`, // defining output path for build files
-        filename: '[name].bundle.js' // defining naming convention for bundled dist file
+        filename: 'js/[name].bundle.js' // defining naming convention for bundled dist file
     },
     module: {
         rules : [
@@ -24,12 +32,20 @@ module.exports = {
             },
             // want to bundle your CSS files? i got u fam
             {
+<<<<<<< HEAD
                 test: /\.css$/,
                 use: ['style-loader', 'css-loader']
             },
             {
                 test: /\.(png|svg|jpg|gif)$/,
                 use: ['file-loader']
+=======
+                test: /\.css/,
+                use: extract.extract({
+                    fallback: 'style-loader',
+                    use: ['css-loader']
+                })
+>>>>>>> webpack config
             }
         ]
     },
@@ -42,9 +58,13 @@ module.exports = {
     plugins: [
         new HTMLWebpackPlugin({
             title: 'Custom Template',
-            template: './src/index.html',
+            template: 'index.html',
             hash: true
         }),
+<<<<<<< HEAD
         extractPlugin
+=======
+        extract
+>>>>>>> webpack config
     ]
 };
