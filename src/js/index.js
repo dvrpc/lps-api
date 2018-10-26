@@ -1,8 +1,9 @@
 import { ckmeans } from '../../node_modules/simple-statistics'
 import '../css/index.css'
-import { getRailLayer } from '../utils/get-passenger-rail-layers.js'
+import { getRailLayer, loadLayers } from '../utils/get-passenger-rail-layers.js'
 import Logo from '../img/DVRPCLogo.png'
 import Loading from '../img/cat.gif'
+import { baseLayers } from '../utils/baseLayers.js';
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
 // color schemes for each operator
 const schemes = {
@@ -55,7 +56,8 @@ const ref = new mapboxgl.Map({
 map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
 // try to work around arcgis 404 error
-fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
+map.on('load', e=>{
+    fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
     .then(response => {
         if (response.ok) {
             response.json()
@@ -79,52 +81,12 @@ fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBin
                     })
                 })
         }
-        // add passenger rail source
-        map.addSource('passengerRailLines', {
-            type: 'geojson',
-            data: 'https://opendata.arcgis.com/datasets/5af7a3e9c0f34a7f93ac8935cb6cae3b_0.geojson'
-        })
-        let layerDef = {
-            "id": "railLabels",
-            "type": "symbol",
-            "source": "passengerRailLines",
-            "filter": ['match', ['get', 'LINE_NAME'], "", true, false],
-            "layout": {
-              "text-field": "{LINE_NAME}",
-              "text-font": [
-                "Montserrat SemiBold",
-                  "Open Sans Semibold"
-                ],
-                "text-size": [
-                  'interpolate', ['linear'], ['zoom'],
-                  8, 8,
-                  12, 14
-                ],
-                "symbol-placement":  "line"
-            },
-            "paint": {
-              "text-color": '#fff',
-                "text-halo-color": [
-                    'match',
-                    ['get', 'TYPE'],
-                    'AMTRAK', '#004d6e',
-                    'NJ Transit', "#f18541",
-                    'NJ Transit Light Rail', '#ffc424',
-                    'PATCO', '#ed164b',
-                    'Rapid Transit', '#9e3e97',
-                    'Regional Rail', '#487997',
-                    'Subway', '#f58221',
-                    'Subway - Elevated', '#067dc1',
-                    'Surface Trolley',  '#529442',
-                    '#323232'
-                  ],
-                "text-halo-width": 2,
-                "text-halo-blur": 3
-            },
-        }
-        map.addLayer(layerDef, 'road-label-small')
+        loadLayers(map, baseLayers)
 
-    }).catch(err => console.err('Error occured in ArcGIS fetch'))
+
+    })
+})
+
 
 
 /* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
@@ -232,21 +194,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             i != infoArray.data.length ? info.query = `${info.query} '${feature.id}',` : info.query = `${info.query} '${feature.id}')`
             i ++
         })
-        // @TODO: Improve on this. Running into that AGO 404 error when retreiving bounds because it's acting like some of the geographies don't exist. 
-        fetch(`https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=${info.query}&outSR=4326&geometryPrecision=4&returnGeometry=false&returnExtentOnly=true&f=pjson`)
-        .then(response=>{
-            if (response.ok){
-                response.json().then(data=>{
-                    let bounds = [(data.extent.xmin + ((data.extent.xmax - data.extent.xmin) / 2)), (data.extent.ymin + ((data.extent.ymax - data.extent.ymin) / 2))]
-                    map.flyTo({
-                        center: bounds,
-                        zoom: 9,
-                        speed: 0.3,
-                    })
-                })
-            }
-            
-        })
         return info.stops
     }
 
@@ -267,7 +214,8 @@ const HexStyling = (infoArray, colorScheme, filter) => {
                     default: '#ccc',
                     stops: GenerateFillFunction(infoArray, colorScheme)
                 },
-                'fill-outline-color': '#888'
+                'fill-outline-color': '#888',
+                'fill-opacity': .7
             }
         }
     }
@@ -314,7 +262,9 @@ fetch('https://a.michaelruane.com/api/lps/test')
                             option.innerText = year
                             form[1].appendChild(option)
                         })
-                    })
+                        map.setFilter('railStations', ['==', 'DVRPC_ID', data[station].id])
+                })
+
                     // loop through stations and create a dropdown option for each one
                     jawn.forEach(station => {
                         let k = Object.keys(station)[0].toString(),
@@ -347,6 +297,7 @@ form.onsubmit = e => {
         'name': station,
         'operator': undefined,
         'mode': undefined,
+        'id': data[station].id,
         'data': [],
         'breaks': []
     }
@@ -375,31 +326,23 @@ form.onsubmit = e => {
                 }
                 // style
                 if (map.getSource('hexBins')) {
-                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'railLabels')
+                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'railHighlight')
 
-                    // use the existing schemes to set station line colors
-                    const operator = stationInfo.operator
-                    const mode = stationInfo.mode
-                    const lineColor = schemes[operator][mode][3]
-
-                    // @TODO: replace lineName with stationInfo.lineName (or whatever) once it gets added to the API response
                     const lineName = stationInfo.line
-                    const railLayer = getRailLayer(lineName, lineColor)
-                    map.addLayer(railLayer, 'railLabels')
+                    map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                     map.setFilter('railLabels', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                 }
+                return map.getFilter('railStations')
             }
         })
-        .then(rendered=>{
-            if(map.getLayer('hexBins')){
-                let test = ref.querySourceFeatures('hexBins', { filter: map.getFilter('hexBins') })
-                test.forEach(feature=>{
-                })
-            }
-            else{
-            }
+        .then(railFilter=>{
+            let test = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: railFilter})
+            map.flyTo({
+                center: test[0].geometry.coordinates,
+                zoom: 10,
+                speed: 0.3,
+            })
         })
-        .catch(error => console.error(error))
     }
     else { alert('Please select a station to continue') }
 }
