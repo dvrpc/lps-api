@@ -16,8 +16,8 @@
   "scripts": {
     "test": "npm test",
     "start": "webpack-dev-server --config webpack.config.js",
-    "build": "webpack && npm version patch",
-    "build:prod": "webpack -p && npm version minor"
+    "build": "npm version patch && webpack",
+    "build:prod": " npm version minor && webpack -p"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
