@@ -136,7 +136,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         })
         const legendBody = document.querySelector(".legend__body")
 
-        console.log({content})
         // numerical summaries
         legendBody.innerHTML = `
         <div class="legend__station-summary">
@@ -263,7 +262,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                             option.innerText = year
                             form[1].appendChild(option)
                         })
-                        map.setFilter('railStations', ['==', 'DVRPC_ID', data[station].id])
+                        data[station].id != null ? map.setFilter('railStations', ['==', 'DVRPC_ID', data[station].id]) : null
                 })
 
                     // loop through stations and create a dropdown option for each one
@@ -271,7 +270,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         let k = Object.keys(station)[0].toString(),
                             option = document.createElement('option')
                         option.value = k
-                        option.innerText = k
+                        option.innerHTML = `${k} <span class="option__lineName">(${station[k].line})</span>`
                         form[0].appendChild(option)
                         data[k] = station[k]
                     })
@@ -389,6 +388,7 @@ form.onsubmit = e => {
         })
         .then(railFilter=>{
             let test = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: railFilter})
+            
             map.flyTo({
                 center: test[0].geometry.coordinates,
                 zoom: 10,
