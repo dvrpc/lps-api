@@ -1,6 +1,6 @@
 {
   "name": "dvrpc-license-plate-survey",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Explorer to retrieve commuter shed data collected from DVRPC parking lot surveys of regional transit stations",
   "author": "Christopher Pollard, Marc Molta, Robert Beatty, Thom Stead",
   "license": "CC0-1.0",
