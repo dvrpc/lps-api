@@ -405,3 +405,17 @@ toggle.addEventListener('click', e => {
     let body = e.target.nextElementSibling
     body.classList.toggle('visible')
 })
+
+// modal clickinator
+const moreInfo = document.querySelector('#more-info')
+const modal = document.querySelector('#modal')
+const close = document.querySelector('#close-modal')
+moreInfo.onclick = () => modal.style.display = 'none' ? modal.style.display = 'block' : modal.style.dislpay = 'none'
+
+// click outside the modal to close it
+// window.onclick = e => {
+//     if(modal.style.display !== 'none' && e.target !== modal) {
+//         console.log('jahwut')
+//         modal.style.display = 'none'
+//     }
+// }

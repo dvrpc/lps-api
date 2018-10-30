@@ -31,6 +31,50 @@ nav{
 #license-plate-logo{
     width: 20%;
 }
+#more-info{
+    border-radius: 50%;
+    text-align: center;
+    font-size: 15px;
+    width: 20px;
+    border: 1px solid #0078ae;
+}
+#more-info:hover{
+    cursor: pointer;
+}
+#modal{
+    z-index: 10;
+    position: absolute;
+    display: none;
+    padding: 3%;
+    left: 15%;
+    top: 25%;
+    width: 67%;
+    margin: 0 auto;
+    overflow: auto;
+    background-color: #f7f7f7;
+    box-shadow: 10px 10px 100px rgba(0,0,0,1);
+    border-radius: 5px;
+}
+#modal p{
+    text-align: left;
+}
+#modal li{
+    padding: 1% 0;
+}
+#close-modal {
+    position: absolute;
+    right: 15px;
+    top: 0;
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+#close-modal:hover, #close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
 #nav-social-media{
     display: flex;
     justify-content: space-around;
@@ -38,7 +82,7 @@ nav{
     margin-bottom: 1%;
 }
 .nav-imgs{
-    width: 50%;
+    width: 45%;
 }
 #dvrpc-logo{
     display: block;
