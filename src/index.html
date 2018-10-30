@@ -20,24 +20,53 @@
 
 <body>
     <nav>
-        <a href="https://www.dvrpc.org/" target="_blank" rel="noopener" id='dvrpc-logo'>
-        </a>
-        <span>
-            <h2>DVRPC Station Shed Explorer</h2>
-        </span>
-        <form id="main-form">
-            <p>Search Stations:</p>
-            <select name='station'>
-                <!-- Build station/year query based on look up table -->
-                <option value="default" selected>Please Select a Station to Continue</option>
-            </select>
+        <img id="license-plate-logo" src="./img/LicencePlate_WebMap_graphics-02.png" alt="License Plate Survey logo" />
+        
+        <div class="nav-column">
+            <div id="nav-social-media">
+                <a href="https://www.dvrpc.org">
+                    <img class="nav-imgs" id="dvrpc-logo" src="./img/navbar/logo.png" alt="dvrpc logo" />
+                </a>
+    
+                <a id="mailto" href="mailto:bruswitz@dvrpc.org/">
+                    <img class="nav-imgs" src="./img/navbar/email.png" alt="icon link to email" />
+                </a>
+    
+                <a href="https://www.facebook.com/DVRPC" target="_blank">
+                    <img class="nav-imgs" src="./img/navbar/facebook.png" alt="icon link to facebook" />
+                </a>
+    
+                <a href="https://twitter.com/DVRPC" target="_blank">
+                    <img class="nav-imgs" src="./img/navbar/twitter.png" alt="icon link to twitter" />
+                </a>
+    
+                <a href="https://www.instagram.com/dvrpc/?hl=en" target="_blank">
+                    <img class="nav-imgs" src="./img/navbar/instagram.png" alt="icon link to instagram" />
+                </a>
+    
+                <a href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission" target="_blank">
+                    <img class="nav-imgs" src="./img/navbar/linkedin.png" alt="icon link to linkedin" />
+                </a>
+    
+                <a href="https://www.youtube.com/user/DVRPC" target="_blank">
+                    <img class="nav-imgs" src="./img/navbar/youtube.png" alt="icon link to youtube" />
+                </a>
+            </div>
 
-            <select name='year'>
-                <option value="default" selected>--</option>
-            </select>
+            <form id="main-form">
+                <p>Search Stations:</p>
+                <select name='station'>
+                    <!-- Build station/year query based on look up table -->
+                    <option value="default" selected>Please Select a Station to Continue</option>
+                </select>
 
-            <input type='submit' value='Search'>
-        </form>
+                <select name='year'>
+                    <option value="default" selected>--</option>
+                </select>
+
+                <input type='submit' value='Search'>
+            </form>
+        </div>
     </nav>
 
     <main role='main' id='map'>

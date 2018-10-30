@@ -24,13 +24,25 @@ nav{
     justify-content: space-between;
     align-items: center;
     text-align: center;
+    padding: 0 1%;
     color: #666;
     border-bottom: 2px solid #0078ae; 
 }
-nav img{
-    width: 75%;
-    margin-left: 15%;
-    padding: 5px;
+#license-plate-logo{
+    width: 20%;
+}
+#nav-social-media{
+    width: 100%;
+    justify-content: space-between;
+}
+.nav-column{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.nav-imgs{
+    width: 3%;
+    height: 100%;
 }
 form{
     display: flex;
@@ -41,7 +53,6 @@ form{
     margin-right: 5%;
     font-weight: 700;
 }
-
 select{
     margin: 0 1%;
     text-align: center;
