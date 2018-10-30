@@ -41,19 +41,17 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
     attributionControl: true,
-    center: [-75.2273, 40.071],
-    zoom: 12 // or whatever zoom you want
+    center: [-75.1636, 39.9499],
+    zoom: 8.5 // or whatever zoom you want
 });
 
 const ref = new mapboxgl.Map({
     container: 'reference',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
-    center: [-75.14, 39.95],
-    zoom: 8,
+    center: [-75, 40],
+    zoom: 7,
     interactive: false
 })
-
-map.fitBounds([[-76.0941, 39.4921], [-74.3253, 40.6147]]);
 
 // try to work around arcgis 404 error
 map.on('load', e=>{
