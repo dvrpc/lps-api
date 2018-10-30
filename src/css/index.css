@@ -26,45 +26,60 @@ nav{
     text-align: center;
     padding: 0 1%;
     color: #666;
-    border-bottom: 2px solid #0078ae; 
+    border-bottom: 2px solid #155472; 
 }
 #license-plate-logo{
     width: 20%;
 }
 #more-info{
+    position: absolute;
+    left: 21%;
+    top: 1%;
     border-radius: 50%;
     text-align: center;
     font-size: 15px;
     width: 20px;
-    border: 1px solid #0078ae;
+    border: 1px solid #155472;
 }
 #more-info:hover{
     cursor: pointer;
 }
 #modal{
     z-index: 10;
-    position: absolute;
+    position: fixed;
     display: none;
-    padding: 3%;
-    left: 15%;
-    top: 25%;
-    width: 67%;
+    left: 0%;
+    top: 0;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
     overflow: auto;
-    background-color: #f7f7f7;
-    box-shadow: 10px 10px 100px rgba(0,0,0,1);
-    border-radius: 5px;
+    background-color: rgba(0, 0, 0, 0.3);
 }
-#modal p{
+#modal-content{
+    position: relative;
+    width: 70%;
+    background: #f7f7f7;
+    padding: 3%;
+    margin: 0 auto;
+    margin-top: 15%;
+    border-radius: 3px;
     text-align: left;
 }
-#modal li{
-    padding: 1% 0;
+#modal-content h2{
+    color: #155472;
+    text-align: center;
+}
+#modal-content ol{
+    padding: 0 0 0 16px;
+}
+#modal-content li{
+    padding-bottom: 1%;
 }
 #close-modal {
     position: absolute;
-    right: 15px;
-    top: 0;
+    right: 2%;
+    top: 1%;
     color: #aaa;
     float: right;
     font-size: 28px;
@@ -150,7 +165,8 @@ main{
     /* Legend */
     .legend__container{
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        width: 20vw;
+        margin-left: 1%;
+        width: 19.5vw;
         position: absolute;
         max-height: 50vh;
         z-index: 2;
@@ -161,7 +177,7 @@ main{
     }
 
     .legend__toggle{
-        background: #91bfdc;
+        background: #155472;
         color: #fff;
         width: 100%;
         margin: auto;
