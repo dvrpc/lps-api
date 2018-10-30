@@ -136,11 +136,12 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         })
         const legendBody = document.querySelector(".legend__body")
 
+        console.log({content})
         // numerical summaries
         legendBody.innerHTML = `
         <div class="legend__station-summary">
             <h1 class="legend__emphasis">${content.name}</h1>
-            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station.</p>
+            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station<br>and is served by the <span class="legend__emphasis">${content.line}</span>.</p>
         </div>
         <div class="legend__number-summary">
             <div class="legend__summary-container">
@@ -317,8 +318,10 @@ form.onsubmit = e => {
             else {
                 // create filter array for hex tile
                 let hex = []
+                let popupReference = new Object();
                 for (let k in jawn) {
                     hex.push(jawn[k].id)
+                    popupReference[jawn[k].id] = jawn[k].count
                     stationInfo['data'].push({
                         'id': jawn[k].id,
                         'count': jawn[k].count
@@ -327,6 +330,55 @@ form.onsubmit = e => {
                 // style
                 if (map.getSource('hexBins')) {
                     map.addLayer(HexStyling(stationInfo, schemes, hex), 'railHighlight')
+                    map.on('click', e=>{
+                        if (map.getLayer('hexClick')){
+                            map.removeLayer('hexClick')
+                        }
+                    })
+
+                    map.on('click', 'hexBins', e=>{
+                        if (popupReference[e.features[0].properties.GRID_ID]){
+                            let count = popupReference[e.features[0].properties.GRID_ID]
+                            let offsets = {
+                                'top': [0, 0],
+                                'top-left': [0,0],
+                                'top-right': [0,0],
+                                'bottom': [0, -15],
+                                'bottom-left': [0,0],
+                                'bottom-right': [0,0],
+                                'left': [0,0],
+                                'right': [0,0]
+                                }
+                            
+                            const popup = new mapboxgl.Popup({ offset: offsets, className: 'map__popup' })
+                            let colors = schemes[stationInfo.operator][stationInfo.mode]
+                            popup.setLngLat(e.lngLat)
+                                .setHTML(`<p style="color: ${colors[colors.length-1]}">${count} Commuters attributed to this area.</p>`)
+                                .addTo(map)
+                            document.querySelector('.mapboxgl-popup-close-button').addEventListener('click', e=>{
+                                if (map.getLayer('hexClick')){
+                                    map.removeLayer('hexClick')
+                                }
+                            })
+                            for (let node of document.querySelectorAll('.mapboxgl-popup-tip')){
+                                node.style.borderTopColor = colors[0]
+                            }
+                            for (let node of document.querySelectorAll('.mapboxgl-popup-content')){
+                                node.style.borderColor = colors[1]
+                            }
+
+                            map.addLayer({
+                                'id': 'hexClick',
+                                'source': 'hexBins',
+                                'type': 'line',
+                                'filter': ['match', ['get', 'GRID_ID'], e.features[0].properties.GRID_ID, true, false],
+                                'paint': {
+                                    'line-color': '#f00',
+                                    'line-width': 2
+                                }
+                            })
+                        }
+                    })
 
                     const lineName = stationInfo.line
                     map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])

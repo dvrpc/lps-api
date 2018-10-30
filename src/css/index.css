@@ -181,6 +181,19 @@ main{
     }
 
 
+    /* pop ups */
+
+    .mapboxgl-popup-content{
+        opacity: .85;
+        border: 2px solid;
+        padding: 7.5px;
+        border-radius: 10px;
+    }
+    .mapboxgl-popup-content>p{
+        font-weight: 700;
+    }
+
+
 /*Transitions*/
 input[type="submit"]:hover{
     color: #fff;
