@@ -1,5 +1,7 @@
 #ignore these folders
 node_modules
 dist
+lib
+*.pyc
 
 package-lock.json
