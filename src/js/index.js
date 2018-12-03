@@ -386,7 +386,8 @@ form.onsubmit = e => {
         })
         .then(railFilter=>{
             let test = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: railFilter})
-            
+            let legend = document.querySelector('.legend__body')
+            !legend.classList.contains('visible') ? legend.classList.add('visible') : null            
             map.flyTo({
                 center: test[0].geometry.coordinates,
                 zoom: 10,
