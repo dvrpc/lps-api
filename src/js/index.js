@@ -4,6 +4,7 @@ import { getRailLayer, loadLayers } from '../utils/get-passenger-rail-layers.js'
 import Logo from '../img/DVRPCLogo.png'
 import Loading from '../img/cat.gif'
 import { baseLayers } from '../utils/baseLayers.js';
+import {fetch} from 'whatwg-fetch'
 mapboxgl.accessToken = 'pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA'
 // color schemes for each operator
 const schemes = {
@@ -41,10 +42,9 @@ const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
     attributionControl: true,
-    center: [-75.1636, 39.9499],
+    center: [-75.142241, 40.0518322],
     zoom: 8.5 // or whatever zoom you want
 });
-
 const ref = new mapboxgl.Map({
     container: 'reference',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
@@ -267,7 +267,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                     // loop through stations and create a dropdown option for each one
                     jawn.forEach(station => {
                         let k = Object.keys(station)[0].toString(),
-                         option = document.createElement('option')
+                        option = document.createElement('option')
                         option.value = k
                         station[k].line != null ? option.innerHTML = `${k} (${station[k].line})` : option.innerHTML =   `${k} (Park and Ride)`
                         form[0].appendChild(option)
@@ -395,6 +395,7 @@ form.onsubmit = e => {
     }
     else { alert('Please select a station to continue') }
 }
+
 
 let toggle = document.querySelector('.legend__toggle')
 toggle.addEventListener('click', e => {
