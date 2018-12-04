@@ -12,18 +12,16 @@
     <meta name='Distribution' content='global'>
     <title>DVRPC License Plate Survey Explorer</title>
     <!-- external files -->
-    <link rel='stylesheet' type='text/css' href='./css/index.css'>
     <link rel='stylesheet' type='text/css' href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script type='text/javascript' src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
-    <script src='./js/index.js' type="module"></script>
 </head>
 
 <body>
     <nav>
         <img id="license-plate-logo" src="<%- require('./img/LicencePlate_WebMap_graphics-02.png')%>" alt="License Plate Survey logo" />
         
-        <span id="more-info">i</span>
+        <span id="more-info" tabindex="4">i</span>
         
         <div id="modal">
             <div id="modal-content">
@@ -52,19 +50,18 @@
         </div>
 
         <div class="nav-column">
-
             <form id="main-form">
                 <p>Search Stations:</p>
-                <select name='station'>
+                <select name='station' tabindex="1">
                     <!-- Build station/year query based on look up table -->
                     <option value="default" selected>Please Select a Station to Continue</option>
                 </select>
 
-                <select name='year'>
+                <select name='year' tabindex="2">
                     <option value="default" selected>--</option>
                 </select>
 
-                <input type='submit' value='Search'>
+                <input type='submit' value='Search' tabindex="3">
             </form>
         </div>
     </nav>
@@ -82,31 +79,31 @@
         </div>
     </main>
     <footer id="nav-social-media">
-        <a href="https://www.dvrpc.org">
+        <a href="https://www.dvrpc.org" tabindex="4">
             <img class="nav-imgs" id="dvrpc-logo" src="<%- require('./img/navbar/logo.png')%>" alt="dvrpc logo" />
         </a>
 
-        <a id="mailto" href="mailto:bruswitz@dvrpc.org/">
-            <img class="nav-imgs" src="<%- require('./img/navbar/email.png')%>" alt="icon link to email" />
+        <a id="mailto" href="mailto:bruswitz@dvrpc.org/" tabindex="5">
+            <img class="nav-imgs" src="<%- require('./img/navbar/email.png')%>" alt="icon link to email" />     
         </a>
 
-        <a href="https://www.facebook.com/DVRPC" target="_blank">
+        <a href="https://www.facebook.com/DVRPC" target="_blank" tabindex="6">
             <img class="nav-imgs" src="<%- require('./img/navbar/facebook.png')%>" alt="icon link to facebook" />
         </a>
 
-        <a href="https://twitter.com/DVRPC" target="_blank">
+        <a href="https://twitter.com/DVRPC" target="_blank" tabindex="7">
             <img class="nav-imgs" src="<%- require('./img/navbar/twitter.png')%>" alt="icon link to twitter" />
         </a>
 
-        <a href="https://www.instagram.com/dvrpc/?hl=en" target="_blank">
+        <a href="https://www.instagram.com/dvrpc/?hl=en" target="_blank" tabindex="8">
             <img class="nav-imgs" src="<%- require('./img/navbar/instagram.png')%>" alt="icon link to instagram" />
         </a>
 
-        <a href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission" target="_blank">
+        <a href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission" target="_blank" tabindex="9">
             <img class="nav-imgs" src="<%- require('./img/navbar/linkedin.png')%>" alt="icon link to linkedin" />
         </a>
 
-        <a href="https://www.youtube.com/user/DVRPC" target="_blank">
+        <a href="https://www.youtube.com/user/DVRPC" target="_blank" tabindex="10">
             <img class="nav-imgs" src="<%- require('./img/navbar/youtube.png')%>" alt="icon link to youtube" />
         </a>
     </footer>

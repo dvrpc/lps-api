@@ -15,6 +15,11 @@ body{
     overflow: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     height: 100vh;
+    display: flex;
+    flex-flow: column;
+}
+nav, footer, main{
+    width: 100%;
 }
 
 
@@ -28,14 +33,12 @@ nav{
     padding: 0 1%;
     color: #666;
     border-bottom: 2px solid #155472; 
-    /* height: 10%; */
+    height: 10%;
 }
 #license-plate-logo{
-    width: 10%;
+    height:100%;
 }
 #more-info{
-    /* position: absolute; */
-    /* left: 21%; */
     margin-left: 2%;
     top: 1%;
     border-radius: 50%;

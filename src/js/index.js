@@ -254,6 +254,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                         // get the new station value
                         let station = e.target.value
                         // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
+                        data[station].years.sort((a,b)=> b - a )
                         data[station]['years'].forEach(year => {
                             let option = document.createElement('option')
                             option.value = year
@@ -266,9 +267,9 @@ fetch('https://a.michaelruane.com/api/lps/test')
                     // loop through stations and create a dropdown option for each one
                     jawn.forEach(station => {
                         let k = Object.keys(station)[0].toString(),
-                            option = document.createElement('option')
+                         option = document.createElement('option')
                         option.value = k
-                        option.innerHTML = `${k} <span class="option__lineName">(${station[k].line})</span>`
+                        station[k].line != null ? option.innerHTML = `${k} (${station[k].line})` : option.innerHTML =   `${k} (Park and Ride)`
                         form[0].appendChild(option)
                         data[k] = station[k]
                     })
@@ -376,23 +377,20 @@ form.onsubmit = e => {
                             })
                         }
                     })
-
-                    const lineName = stationInfo.line
-                    map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])
-                    map.setFilter('railLabels', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                 }
-                return map.getFilter('railStations')
+                const lineName = stationInfo.line
+                map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])
+                let legend = document.querySelector('.legend__body')
+                !legend.classList.contains('visible') ? legend.classList.add('visible') : null
+                let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: map.getFilter('railStations')})
+                if (extent.length > 0){           
+                    map.flyTo({
+                        center: extent[0].geometry.coordinates,
+                        zoom: 10,
+                        speed: 0.3,
+                    })
+                }
             }
-        })
-        .then(railFilter=>{
-            let test = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: railFilter})
-            let legend = document.querySelector('.legend__body')
-            !legend.classList.contains('visible') ? legend.classList.add('visible') : null            
-            map.flyTo({
-                center: test[0].geometry.coordinates,
-                zoom: 10,
-                speed: 0.3,
-            })
         })
     }
     else { alert('Please select a station to continue') }
@@ -410,11 +408,26 @@ const moreInfo = document.querySelector('#more-info')
 const modal = document.querySelector('#modal')
 const close = document.querySelector('#close-modal')
 
+const AriaHideModal = () =>{
+    modal.style.display = 'none'
+    modal.setAttribute('aria-hidden', 'true')
+}
+
+const AriaShowModal = () =>{
+    modal.style.display = 'block'
+    modal.setAttribute('aria-hidden', 'false')
+}
+
 // open the modal
-moreInfo.onclick = () => modal.style.display = 'none' ? modal.style.display = 'block' : modal.style.dislpay = 'none'
+moreInfo.onclick = () => modal.style.display = 'none' ?  AriaShowModal() : AriaHideModal()
 
 // close the modal by clicking the 'x' or anywhere outside of it
-close.onclick = () => modal.style.display = 'none'
+close.onclick = () => AriaHideModal()
 window.onclick = event => {
-    if (event.target == modal) modal.style.display = "none"
+    if (event.target == modal) AriaHideModal()
 }
+document.onkeydown(e=>{
+    if ( modal.style.display === 'block') {
+        if (e.keyCode === 27) AriaHideModal()
+    }
+})

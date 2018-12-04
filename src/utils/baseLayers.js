@@ -1,19 +1,47 @@
 export const baseLayers = {
-  counties: {
+  munis:{
+    sourceDef: {
+      type: "vector",
+      url: "https://tiles.dvrpc.org/data/dvrpc-municipal.json"
+    },
+    layers: {
+      muni: {
+        id: 'muniBoundaries',
+        type: 'line',
+        source: 'munis',
+        "source-layer": 'municipalities',
+        paint:{
+          "line-color": "#aaa",
+          "line-width" : [
+            'interpolate', ['linear'], ['zoom'],
+            7, .25,
+            10.5, 1
+          ],
+          "line-opacity": [
+            'interpolate', ['linear'], ['zoom'],
+            7, .1,
+            10.5, .8
+          ],
+          'line-dasharray': [2, 4]
+        }
+      },
+    }
+  },
+  boundaries: {
     sourceDef: {
       type: "vector",
       url: "https://tiles.dvrpc.org/data/dvrpc-municipal.json",
     },
     layers: {
-      outline: {
+      county: {
         id : "countyBoundaries",
         filter: ['==', 'dvrpc', 'Yes'],
         type: "line",
         "source-layer": 'county',
-        source: 'counties',
+        source: 'boundaries',
         paint:{
           "line-color": "#aaa",
-          "line-width": .5
+          "line-width": 1
         }
       }
     }
