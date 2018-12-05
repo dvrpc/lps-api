@@ -137,7 +137,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         legendBody.innerHTML = `
         <div class="legend__station-summary">
             <h1 class="legend__emphasis">${content.name}</h1>
-            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station<br>and is served by the <span class="legend__emphasis">${content.line}</span>.</p>
+            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station<br>and is served by the <span class="legend__emphasis">${content.line}</span>.<br>Displaying results for the <span class="legend__emphasis">${content.year}</span> survey.</p>
         </div>
         <div class="legend__number-summary">
             <div class="legend__summary-container">
@@ -147,8 +147,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         </div>
         <div class="legend__distribution-summary"></div>
         `
-    
-
+        content.name == 'Wissinoming' || content.name == 'Lamokin Street' ? legendBody.innerHTML = legendBody.innerHTML+'<div style="order: 4"><p class="legend__text legend__emphasis">* This station is no longer operational.</p></div>' : null
         // set colors appropriately based on operator/mode scheme system
         const emphasis = document.querySelectorAll(".legend__emphasis")
         emphasis.forEach(node => {
@@ -260,7 +259,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                             option.innerText = year
                             form[1].appendChild(option)
                         })
-                        data[station].id != null ? map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) : null
+                        data[station].id != null ? map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) : alert('This option does not have a mapped station')
                 })
 
                     // loop through stations and create a dropdown option for each one
@@ -299,6 +298,7 @@ form.onsubmit = e => {
         'name': station,
         'operator': undefined,
         'mode': undefined,
+        'year': selectedYear,
         'id': data[station].id,
         'data': [],
         'breaks': []
@@ -382,7 +382,7 @@ form.onsubmit = e => {
                     })
                 }
                 const lineName = stationInfo.line
-                map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])
+                map.setFilter('railHighlight', ['==', ['get', 'LINE_NAME'], lineName])
                 let legend = document.querySelector('.legend__body')
                 !legend.classList.contains('visible') ? legend.classList.add('visible') : null
                 let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'DVRPC_ID', data[station].id]})
