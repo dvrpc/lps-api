@@ -27,7 +27,7 @@ const schemes = {
     },
     'DOT': {
         'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
-    },
+    }
 }
 const logoContainer = document.querySelector('#dvrpc-logo')
 let logo = new Image()
@@ -53,7 +53,6 @@ const ref = new mapboxgl.Map({
     interactive: false
 })
 
-// try to work around arcgis 404 error
 map.on('load', e=>{
     fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
     .then(response => {
@@ -280,13 +279,17 @@ fetch('https://a.michaelruane.com/api/lps/test')
 
 form.onsubmit = e => {
     e.preventDefault()
-
     // check if a layer exists on the map already & remove it
     if (map.getLayer('hexBins')) {
         map.removeLayer('hexBins')
     }
     if (map.getLayer('railLayer')) {
         map.removeLayer('railLayer')
+    }
+    if (document.querySelector('.mapboxgl-popup')){
+        map.removeLayer('hexClick')
+        let popup = document.querySelector('.mapboxgl-popup')
+        popup.parentNode.removeChild(popup)
     }
     let station = e.target[0].value,
         selectedYear = e.target[1].value

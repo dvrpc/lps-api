@@ -1,10 +1,13 @@
 var path = require('path'),
         HTMLWebpackPlugin = require('html-webpack-plugin'),
-        ExtractTextPlugin = require('extract-text-webpack-plugin')
-        
+        ExtractTextPlugin = require('extract-text-webpack-plugin'),
+        webpack = require('webpack'),
+        polyfill = require('es6-promise').polyfill()
 var extractPlugin = new ExtractTextPlugin({
     filename: './bundle.styles.css'
 })
+
+
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     entry: `./js/index.js`, // main JS file for application
@@ -40,6 +43,10 @@ module.exports = {
                         limit: 1000
                     }
                 }]
+            },
+            {
+                test: require.resolve('imports-loader'),
+                use : "imports-loader?this=>window"
             }
         ]
     },
@@ -55,6 +62,10 @@ module.exports = {
             template: 'index.html',
             hash: true
         }),
-        extractPlugin
+        extractPlugin,
+        new webpack.ProvidePlugin({
+            "Promise": "imports-loader?this=>global!exports-loader?global.Promise!es6-promise",
+            "fetch": "imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch"
+        })
     ]
 };
