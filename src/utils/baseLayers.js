@@ -164,8 +164,20 @@ export const baseLayers = {
       data: 'https://opendata.arcgis.com/datasets/68b970bf65bc411c8a7f8f7b0bb7908d_0.geojson',
     },
     layers: {
-      base: {
-        id: 'railStations',
+      base:{
+        id: 'railStations-base',
+        source: 'railStations',
+        type: 'circle',
+        paint : {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
+          'circle-color': '#aaa',
+          'circle-stroke-color': '#fff',
+          'circle-opacity': .9,
+          'circle-stroke-width': .5
+        }
+      },
+      highlight: {
+        id: 'railStations-highlight',
         source: 'railStations',
         type: 'circle',
         filter: ['==', 'DVRPC_ID', ''],
@@ -175,6 +187,19 @@ export const baseLayers = {
           'circle-stroke-width': 1.5,
           'circle-color': 'yellow',
           'circle-opacity': .5
+        }
+      },
+      hover: {
+        id: 'railStations-hover',
+        source: 'railStations',
+        type: 'circle',
+        filter: ['==', 'DVRPC_ID', ''],
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 3, 12, 6],
+          'circle-stroke-color': '#f00',
+          'circle-stroke-width': 2,
+          'circle-color': '#aaa',
+          'circle-opacity': .9
         }
       }
     }

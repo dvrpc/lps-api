@@ -15,6 +15,7 @@ body{
     overflow: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     height: 100vh;
+    width: 100vw;
     display: flex;
     flex-flow: column;
 }
@@ -109,9 +110,9 @@ form{
     justify-content: center;
     align-items: center;
     height: 100%;
-    width: 50vw;
     margin-right: 5%;
     font-weight: 700;
+    width: 50vw;
 }
 select{
     margin: 0 1%;
@@ -124,9 +125,6 @@ option:hover{
     background-color: #91BFDC
 }
 
-select[name='station']{
-    flex: 2 1 15%
-}
 input[type="submit"]{
     color: #0078ae;
     background: #fff;
@@ -142,7 +140,7 @@ select, input[type="submit"]:hover{
 }
 select, input[type="submit"]{
     /*cool fancy trick I learned from Twitter on how to make fonts more responsive*/
-    font-size: calc(12px + 0.3vw);
+    font-size: .95rem;
     padding: 5px 2%;
     border-radius: 5px;
     box-shadow: 2px 2px 1px 0px #bbb;
@@ -160,25 +158,24 @@ main{
     .legend__container{
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         margin-left: 1%;
-        width: 19.5vw;
         position: absolute;
-        max-height: 50vh;
         z-index: 2;
         text-align: center;
         display: flex;
         flex-direction: column;
         box-shadow: 3px 3px 6px 2px #aaa;
+        width: 20vw;
     }
 
     .legend__toggle{
         background: #155472;
         color: #fff;
         width: 100%;
-        margin: auto;
         font-size: 1.25em;
         padding: 5px 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         order: 1;
+        margin: auto;
 }
 
     .legend__toggle.visible{
@@ -187,16 +184,17 @@ main{
 
     .legend__body{
         display: none;
-        height: 0px;
         flex-flow: column nowrap;
         justify-content: space-evenly;
         flex: 1 1;
         align-items: center;
+        width: 100%;
+    }
+    .legend__body>*{
+        padding: 1%;
     }
     .legend__body.visible{
         display: flex;
-        width: 100%;
-        height: 30vh;
         background: white;
         opacity: 0.85;
         text-align: center;
@@ -209,6 +207,7 @@ main{
         display: flex;
         justify-content: center;
         flex-flow: column nowrap;
+        margin-top: 5%;
     }
     .legend__station-summary>*{
         margin: 5px 0 0;
@@ -244,25 +243,40 @@ main{
         margin: 0 0 2%
     }
     .legend__distribution-summary{
-        height: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         order: 3;
-        flex: 3 2 10%
+        flex: 3 2 10%;
+        margin-bottom: 5%;
     }
 
 
     /* pop ups */
 
-    .mapboxgl-popup-content{
+    .map__hexPopup>.mapboxgl-popup-content{
         opacity: .85;
         border: 2px solid;
         padding: 7.5px;
         border-radius: 10px;
     }
-    .mapboxgl-popup-content>p{
+    .map__hexPopup>.mapboxgl-popup-content>p{
         font-weight: 700;
+    }
+    .map__stationPopup{
+        text-align: center;
+    }
+    .map__stationPopup>.mapboxgl-popup-content>p{
+        margin: 1% auto;
+    }
+    .map__stationPopup_stationInfo{
+        font-weight: 700;
+        font-size: 1rem;
+        color: #999;
+    }
+    .map__stationPopup_lineInfo{
+        font-size: .8rem;
+        color: #aaa;
     }
 
 

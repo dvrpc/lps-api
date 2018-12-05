@@ -260,7 +260,7 @@ fetch('https://a.michaelruane.com/api/lps/test')
                             option.innerText = year
                             form[1].appendChild(option)
                         })
-                        data[station].id != null ? map.setFilter('railStations', ['==', 'DVRPC_ID', data[station].id]) : null
+                        data[station].id != null ? map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) : null
                 })
 
                     // loop through stations and create a dropdown option for each one
@@ -286,9 +286,9 @@ form.onsubmit = e => {
     if (map.getLayer('railLayer')) {
         map.removeLayer('railLayer')
     }
-    if (document.querySelector('.mapboxgl-popup')){
+    if (document.querySelector('.map__hexPopup')){
         map.removeLayer('hexClick')
-        let popup = document.querySelector('.mapboxgl-popup')
+        let popup = document.querySelector('.map__hexPopup')
         popup.parentNode.removeChild(popup)
     }
     let station = e.target[0].value,
@@ -351,7 +351,7 @@ form.onsubmit = e => {
                                 'right': [0,0]
                                 }
                             
-                            const popup = new mapboxgl.Popup({ offset: offsets, className: 'map__popup' })
+                            const popup = new mapboxgl.Popup({ offset: offsets, className: 'map__hexPopup' })
                             let colors = schemes[stationInfo.operator][stationInfo.mode]
                             popup.setLngLat(e.lngLat)
                                 .setHTML(`<p style="color: ${colors[colors.length-1]}">${count} Commuters attributed to this area.</p>`)
@@ -385,7 +385,7 @@ form.onsubmit = e => {
                 map.setFilter('railHighlight', ['match', ['get', 'LINE_NAME'], lineName, true, false])
                 let legend = document.querySelector('.legend__body')
                 !legend.classList.contains('visible') ? legend.classList.add('visible') : null
-                let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations', filter: map.getFilter('railStations')})
+                let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'DVRPC_ID', data[station].id]})
                 if (extent.length > 0){           
                     map.flyTo({
                         center: extent[0].geometry.coordinates,
@@ -398,7 +398,37 @@ form.onsubmit = e => {
     }
     else { alert('Please select a station to continue') }
 }
-
+const StationPopup = event =>{
+    let props = event.features[0].properties
+    let popup = new mapboxgl.Popup({
+        offset: {
+            'top': [0, 0],
+            'top-left': [0,0],
+            'top-right': [0,0],
+            'bottom': [0, -10],
+            'bottom-left': [0,0],
+            'bottom-right': [0,0],
+            'left': [0,0],
+            'right': [0,0]
+            },
+        className: 'map__stationPopup'
+    })
+    popup.setLngLat(event.lngLat)
+        .setHTML(`<p class="map__stationPopup_stationInfo">${props.STATION} Station</p><p class="map__stationPopup_lineInfo">${props.OPERATOR} ${props.LINE}</p>`)
+        .addTo(map)
+    return popup
+}
+let stationPopup;
+map.on('mouseover', 'railStations-base', e=>{
+    map.getCanvas().style.cursor = 'pointer'
+    map.setFilter('railStations-hover', ['==', 'DVRPC_ID', e.features[0].properties.DVRPC_ID])
+    stationPopup = StationPopup(e)
+})
+map.on('mouseleave', 'railStations-base', e=>{
+    map.getCanvas().style.cursor = ''
+    map.setFilter('railStations-hover', ['==', 'DVRPC_ID', ''])
+    stationPopup.remove()
+})
 
 let toggle = document.querySelector('.legend__toggle')
 toggle.addEventListener('click', e => {
@@ -412,26 +442,29 @@ const moreInfo = document.querySelector('#more-info')
 const modal = document.querySelector('#modal')
 const close = document.querySelector('#close-modal')
 
-const AriaHideModal = () =>{
-    modal.style.display = 'none'
-    modal.setAttribute('aria-hidden', 'true')
+const AriaHide = element =>{
+    element.style.display = 'none'
+    element.setAttribute('aria-hidden', 'true')
 }
 
-const AriaShowModal = () =>{
-    modal.style.display = 'block'
-    modal.setAttribute('aria-hidden', 'false')
+const AriaShow = (element) =>{
+    element.style.display = 'block'
+    element.setAttribute('aria-hidden', 'false')
 }
 
 // open the modal
-moreInfo.onclick = () => modal.style.display = 'none' ?  AriaShowModal() : AriaHideModal()
-
+moreInfo.onclick = () => modal.style.display = 'none' ?  AriaShow(modal) : AriaHide(modal)
+toggle.onclick = () =>{
+    let body = toggle.nextElementSibling
+    body.style.display = 'none' ? AriaShow(body) : AriaHide(body)
+}
 // close the modal by clicking the 'x' or anywhere outside of it
-close.onclick = () => AriaHideModal()
+close.onclick = () => AriaHide(modal)
 window.onclick = event => {
-    if (event.target == modal) AriaHideModal()
+    if (event.target == modal) AriaHide(modal)
 }
 document.onkeydown(e=>{
     if ( modal.style.display === 'block') {
-        if (e.keyCode === 27) AriaHideModal()
+        if (e.keyCode === 27) AriaHide(modal)
     }
 })

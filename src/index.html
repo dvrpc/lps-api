@@ -20,7 +20,7 @@
     <nav>
         <img id="license-plate-logo" src="<%- require('./img/LicencePlate_WebMap_graphics-02.png')%>" alt="License Plate Survey logo" />
         
-        <span id="more-info" tabindex="4">i</span>
+        <span id="more-info" tabindex="12">i</span>
         
         <div id="modal">
             <div id="modal-content">
@@ -67,8 +67,8 @@
 
     <main role='main' id='map'>
         <div class="legend__container">
-            <p class="legend__toggle">Legend</p>
-            <div class="legend__body">
+            <p class="legend__toggle" tabindex="4">Legend</p>
+            <div class="legend__body" aria-hidden="true">
                 <span>
                     <h2>Nothing to display!</h2>
                     <h4>please conduct a search to continue</h4>
@@ -78,31 +78,31 @@
         </div>
     </main>
     <footer id="nav-social-media">
-        <a href="https://www.dvrpc.org" tabindex="4">
+        <a href="https://www.dvrpc.org" tabindex="5">
             <img class="nav-imgs" id="dvrpc-logo" src="<%- require('./img/navbar/logo.png')%>" alt="dvrpc logo" />
         </a>
 
-        <a id="mailto" href="mailto:bruswitz@dvrpc.org/" tabindex="5">
+        <a id="mailto" href="mailto:tstead@dvrpc.org/" tabindex="6">
             <img class="nav-imgs" src="<%- require('./img/navbar/email.png')%>" alt="icon link to email" />     
         </a>
 
-        <a href="https://www.facebook.com/DVRPC" target="_blank" tabindex="6">
+        <a href="https://www.facebook.com/DVRPC" target="_blank" tabindex="7">
             <img class="nav-imgs" src="<%- require('./img/navbar/facebook.png')%>" alt="icon link to facebook" />
         </a>
 
-        <a href="https://twitter.com/DVRPC" target="_blank" tabindex="7">
+        <a href="https://twitter.com/DVRPC" target="_blank" tabindex="8">
             <img class="nav-imgs" src="<%- require('./img/navbar/twitter.png')%>" alt="icon link to twitter" />
         </a>
 
-        <a href="https://www.instagram.com/dvrpc/?hl=en" target="_blank" tabindex="8">
+        <a href="https://www.instagram.com/dvrpc/?hl=en" target="_blank" tabindex="9">
             <img class="nav-imgs" src="<%- require('./img/navbar/instagram.png')%>" alt="icon link to instagram" />
         </a>
 
-        <a href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission" target="_blank" tabindex="9">
+        <a href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission" target="_blank" tabindex="10">
             <img class="nav-imgs" src="<%- require('./img/navbar/linkedin.png')%>" alt="icon link to linkedin" />
         </a>
 
-        <a href="https://www.youtube.com/user/DVRPC" target="_blank" tabindex="10">
+        <a href="https://www.youtube.com/user/DVRPC" target="_blank" tabindex="11">
             <img class="nav-imgs" src="<%- require('./img/navbar/youtube.png')%>" alt="icon link to youtube" />
         </a>
     </footer>
