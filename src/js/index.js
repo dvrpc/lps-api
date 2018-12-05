@@ -431,11 +431,11 @@ map.on('mouseleave', 'railStations-base', e=>{
 })
 
 let toggle = document.querySelector('.legend__toggle')
-toggle.addEventListener('click', e => {
-    e.preventDefault()
-    let body = e.target.nextElementSibling
-    body.classList.toggle('visible')
-})
+// toggle.addEventListener('click', e => {
+//     e.preventDefault()
+//     let body = e.target.nextElementSibling
+//     body.classList.toggle('visible')
+// })
 
 // modal clickinator
 const moreInfo = document.querySelector('#more-info')
@@ -443,12 +443,12 @@ const modal = document.querySelector('#modal')
 const close = document.querySelector('#close-modal')
 
 const AriaHide = element =>{
-    element.style.display = 'none'
+    element.classList.remove('visible')
     element.setAttribute('aria-hidden', 'true')
 }
 
 const AriaShow = (element) =>{
-    element.style.display = 'block'
+    element.classList.add('visible')
     element.setAttribute('aria-hidden', 'false')
 }
 
@@ -456,7 +456,7 @@ const AriaShow = (element) =>{
 moreInfo.onclick = () => modal.style.display = 'none' ?  AriaShow(modal) : AriaHide(modal)
 toggle.onclick = () =>{
     let body = toggle.nextElementSibling
-    body.style.display = 'none' ? AriaShow(body) : AriaHide(body)
+    body.classList.contains('visible') ? AriaHide(body) : AriaShow(body)
 }
 // close the modal by clicking the 'x' or anywhere outside of it
 close.onclick = () => AriaHide(modal)

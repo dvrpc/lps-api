@@ -17,7 +17,7 @@ export const loadLayers = (map, layers) =>{
     for (let source in layers){
         map.addSource(source, layers[source].sourceDef)
         for (let layer in layers[source].layers){
-            map.addLayer(layers[source].layers[layer], 'waterway-label')
+            layers[source].layers[layer].placement? map.addLayer(layers[source].layers[layer].layerDef, layers[source].layers[layer].placement) : map.addLayer(layers[source].layers[layer].layerDef, 'waterway-label')
         }
         
     }

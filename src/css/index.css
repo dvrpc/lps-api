@@ -63,9 +63,13 @@ nav{
     overflow: auto;
     background-color: rgba(0, 0, 0, 0.3);
 }
+#modal.visible{
+    display: flex
+}
 #modal-content{
     position: relative;
     width: 70%;
+    height: 33%;
     background: #f7f7f7;
     padding: 3%;
     margin: 0 auto;
