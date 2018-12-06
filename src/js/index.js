@@ -25,7 +25,7 @@ const schemes = {
         'Commuter Rail': ['#e2e2e2', '#f18541', '#b02c87', '#045099'],
         'Light Rail': ['#ffd847', '#9de779', '#2ae6c2', '#00daf5']
     },
-    'DOT': {
+    'TMACC': {
         'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
     }
 }
@@ -38,12 +38,16 @@ const loadingContainer = document.querySelector('#cat-loading')
 let loading = new Image()
 loading.src = Loading
 loadingContainer.appendChild(loading)
+const baseExtent = {
+    center : [-75.142241, 40.0518322],
+    zoom: 8.5
+}
 const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8',
     attributionControl: true,
-    center: [-75.142241, 40.0518322],
-    zoom: 8.5 // or whatever zoom you want
+    center: baseExtent.center,
+    zoom: baseExtent.zoom// or whatever zoom you want
 });
 const ref = new mapboxgl.Map({
     container: 'reference',
@@ -134,19 +138,36 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         const legendBody = document.querySelector(".legend__body")
 
         // numerical summaries
-        legendBody.innerHTML = `
-        <div class="legend__station-summary">
-            <h1 class="legend__emphasis">${content.name}</h1>
-            <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station<br>and is served by the <span class="legend__emphasis">${content.line}</span>.<br>Displaying results for the <span class="legend__emphasis">${content.year}</span> survey.</p>
-        </div>
-        <div class="legend__number-summary">
-            <div class="legend__summary-container">
-                <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
-                <p class="legend__text">Total Commuters</p>
-            </div>
-        </div>
-        <div class="legend__distribution-summary"></div>
-        `
+        if (content.line == null){
+            legendBody.innerHTML = `
+                <div class="legend__station-summary">
+                    <h1 class="legend__emphasis">${content.name}</h1>
+                    <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span>.<br>Currently displaying results for the <span class="legend__emphasis">${content.year}</span> survey.</p>
+                </div>
+                <div class="legend__number-summary">
+                    <div class="legend__summary-container">
+                        <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
+                        <p class="legend__text">Total Commuters</p>
+                    </div>
+                </div>
+                <div class="legend__distribution-summary"></div>
+                `;
+        }
+        else{
+            legendBody.innerHTML = `
+                    <div class="legend__station-summary">
+                        <h1 class="legend__emphasis">${content.name}</h1>
+                        <p class="legend__text"><span class="legend__emphasis">${content.operator}</span> operated <span class="legend__emphasis">${content.mode}</span> station<br>and is served by the <span class="legend__emphasis">${content.line}</span>.<br>Currently displaying results for the <span class="legend__emphasis">${content.year}</span> survey.</p>
+                    </div>
+                    <div class="legend__number-summary">
+                        <div class="legend__summary-container">
+                            <p class="legend__emphasis summary">${range.reduce((a, b) => a + b)}</p>
+                            <p class="legend__text">Total Commuters</p>
+                        </div>
+                    </div>
+                    <div class="legend__distribution-summary"></div>
+                    `;
+        }
         content.name == 'Wissinoming' || content.name == 'Lamokin Street' ? legendBody.innerHTML = legendBody.innerHTML+'<div style="order: 4"><p class="legend__text legend__emphasis">* This station is no longer operational.</p></div>' : null
         // set colors appropriately based on operator/mode scheme system
         const emphasis = document.querySelectorAll(".legend__emphasis")
@@ -239,41 +260,41 @@ const form = document.querySelector('#main-form')
 let data = new Object();
 // populate dropdowns with possible query values
 fetch('https://a.michaelruane.com/api/lps/test')
-    .then(response => {
-        if (response.ok) {
-            response.json()
-                .then(jawn => {
-                    // listener to populate year dropdown with valid values based on db on station change
-                    form[0].addEventListener('change', e => {
-                        // remove any artifacts
-                        while (form[1].firstChild) {
-                            form[1].removeChild(form[1].firstChild)
-                        }
-                        // get the new station value
-                        let station = e.target.value
-                        // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
-                        data[station].years.sort((a,b)=> b - a )
-                        data[station]['years'].forEach(year => {
-                            let option = document.createElement('option')
-                            option.value = year
-                            option.innerText = year
-                            form[1].appendChild(option)
-                        })
-                        data[station].id != null ? map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) : alert('This option does not have a mapped station')
-                })
+    .then(response => response.ok ? response.json() : console.error('Failed to fetch surveyed stations') )
+    .then(jawn => {
+        // listener to populate year dropdown with valid values based on db on station change
+        form[0].addEventListener('change', e => {
+            // remove any artifacts
+            while (form[1].firstChild) {
+                form[1].removeChild(form[1].firstChild)
+            }
+            // get the new station value
+            let station = e.target.value
+            // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
+            data[station].years.sort((a,b)=> b - a )
+            data[station]['years'].forEach(year => {
+                let option = document.createElement('option')
+                option.value = year
+                option.innerText = year
+                form[1].appendChild(option)
+            })
+            if (data[station].id != null) map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) 
+            else{
+                map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', ''])
+                alert('This option does not have a mapped station')
+            }
+    })
 
-                    // loop through stations and create a dropdown option for each one
-                    jawn.forEach(station => {
-                        let k = Object.keys(station)[0].toString(),
-                        option = document.createElement('option')
-                        option.value = k
-                        station[k].line != null ? option.innerHTML = `${k} (${station[k].line})` : option.innerHTML =   `${k} (Park and Ride)`
-                        form[0].appendChild(option)
-                        data[k] = station[k]
-                    })
-                    return data
-                })
-        }
+        // loop through stations and create a dropdown option for each one
+        jawn.forEach(station => {
+            let k = Object.keys(station)[0].toString(),
+            option = document.createElement('option')
+            option.value = k
+            station[k].line != null ? option.innerHTML = `${k} (${station[k].line})` : option.innerHTML =   `${k} (Park and Ride)`
+            form[0].appendChild(option)
+            data[k] = station[k]
+        })
+        return data
     })
 
 form.onsubmit = e => {
@@ -386,13 +407,8 @@ form.onsubmit = e => {
                 let legend = document.querySelector('.legend__body')
                 !legend.classList.contains('visible') ? legend.classList.add('visible') : null
                 let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'DVRPC_ID', data[station].id]})
-                if (extent.length > 0){           
-                    map.flyTo({
-                        center: extent[0].geometry.coordinates,
-                        zoom: 10,
-                        speed: 0.3,
-                    })
-                }
+                if (extent.length > 0) map.flyTo({ center: extent[0].geometry.coordinates, zoom: 10, speed: 0.3 })
+                else map.flyTo({ center: baseExtent.center, zoom: baseExtent.zoom, speed: 0.3})
             }
         })
     }
