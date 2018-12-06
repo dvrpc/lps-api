@@ -479,8 +479,14 @@ close.onclick = () => AriaHide(modal)
 window.onclick = event => {
     if (event.target == modal) AriaHide(modal)
 }
-document.onkeydown(e=>{
-    if ( modal.style.display === 'block') {
-        if (e.keyCode === 27) AriaHide(modal)
+document.onkeydown = e=>{
+    if ( modal.classList.contains('visible')) {
+        if (e.key === 'Escape') AriaHide(modal)
     }
-})
+    else if (e.target.id === moreInfo.id){
+        if (e.key === 'Enter') AriaShow(modal)
+    }
+    else if (e.target === toggle){
+        e.key === 'Enter' && toggle.nextElementSibling.classList.contains('visible') ? AriaHide(toggle.nextElementSibling) : AriaShow(toggle.nextElementSibling)
+    }
+}
