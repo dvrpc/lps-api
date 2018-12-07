@@ -415,6 +415,9 @@ form.onsubmit = e => {
 }
 const StationPopup = event =>{
     let props = event.features[0].properties
+    let content;
+    if (props.LINE === 'n/a') content = `<p class="map__stationPopup_stationInfo">${props.STATION} </p><p class="map__stationPopup_lineInfo">${props.OPERATOR} Park and Ride</p>` 
+    else content = `<p class="map__stationPopup_stationInfo">${props.STATION} Station</p><p class="map__stationPopup_lineInfo">${props.OPERATOR} ${props.LINE}</p>`
     let popup = new mapboxgl.Popup({
         offset: {
             'top': [0, 0],
@@ -429,7 +432,7 @@ const StationPopup = event =>{
         className: 'map__stationPopup'
     })
     popup.setLngLat(event.lngLat)
-        .setHTML(`<p class="map__stationPopup_stationInfo">${props.STATION} Station</p><p class="map__stationPopup_lineInfo">${props.OPERATOR} ${props.LINE}</p>`)
+        .setHTML(content)
         .addTo(map)
     return popup
 }
