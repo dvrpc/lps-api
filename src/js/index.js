@@ -281,7 +281,6 @@ fetch('https://a.michaelruane.com/api/lps/test')
             if (data[station].id != null) map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) 
             else{
                 map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', ''])
-                alert('This option does not have a mapped station')
             }
     })
 
@@ -479,6 +478,7 @@ close.onclick = () => AriaHide(modal)
 window.onclick = event => {
     if (event.target == modal) AriaHide(modal)
 }
+
 document.onkeydown = e=>{
     if ( modal.classList.contains('visible')) {
         if (e.key === 'Escape') AriaHide(modal)

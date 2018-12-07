@@ -69,11 +69,9 @@ nav{
 #modal-content{
     position: relative;
     width: 70%;
-    height: 33%;
-    background: #f7f7f7;
+    background:     #f7f7f7;
     padding: 3%;
-    margin: 0 auto;
-    margin-top: 15%;
+    margin: auto;
     border-radius: 3px;
     text-align: left;
     box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
