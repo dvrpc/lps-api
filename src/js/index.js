@@ -84,8 +84,6 @@ map.on('load', e=>{
                 })
         }
         loadLayers(map, baseLayers)
-
-
     })
 })
 
@@ -219,7 +217,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         return filter
     }
 
-    // HALF THE FUCKING TIME IT'S FILTERING THE WRONG SHIT WHAT THE FUCK IS GOING ON I HATE THIS SHIT FUCK
     infoArray['data'].sort(SortObjectsByField('count'))
     BuildLegend(infoArray, schemes)
     return {
