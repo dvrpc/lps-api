@@ -28,7 +28,9 @@ const schemes = {
     'TMACC': {
         'Park and Ride': ['#999999', '#777777', '#575757', '#383838']
     }
+
 }
+
 const logoContainer = document.querySelector('#dvrpc-logo')
 let logo = new Image()
 logo.src = Logo
@@ -340,8 +342,8 @@ form.onsubmit = e => {
                 })
 
                 map.on('click', 'hexBins', e=>{
-                    if (popupReference[e.features[0].properties.GRID_ID]){
-                        let count = popupReference[e.features[0].properties.GRID_ID]
+                    if (popupReference[e.features[0].properties.FID]){
+                        let count = popupReference[e.features[0].properties.FID]
                         let offsets = {
                             'top': [0, 0],
                             'top-left': [0,0],
@@ -387,6 +389,7 @@ form.onsubmit = e => {
             map.setFilter('railHighlight', ['==', ['get', 'LINE_NAME'], lineName])
             let legend = document.querySelector('.legend__body')
             !legend.classList.contains('visible') ? legend.classList.add('visible') : null
+            console.log(data[station])
             let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'SURVEY_ID', data[station].id]})
             if (extent.length > 0) map.flyTo({ center: extent[0].geometry.coordinates, zoom: 10, speed: 0.3 })
             else map.flyTo({ center: baseExtent.center, zoom: baseExtent.zoom, speed: 0.3})
@@ -396,10 +399,30 @@ form.onsubmit = e => {
     else { alert('Please select a station to continue') }
 }
 const StationPopup = event =>{
-    let props = event.features[0].properties
     let content;
-    if (props.LINE === 'n/a') content = `<p class="map__stationPopup_stationInfo">${props.STATION} </p><p class="map__stationPopup_lineInfo">${props.OPERATOR} Park and Ride</p>` 
-    else content = `<p class="map__stationPopup_stationInfo">${props.STATION} Station</p><p class="map__stationPopup_lineInfo">${props.OPERATOR} ${props.LINE}</p>`
+    if (data[event.features[0].properties.SURVEY_ID]){
+        let stationData = data[event.features[0].properties.SURVEY_ID]
+        let colorScheme = schemes[stationData.operator][stationData.mode]
+        content = `
+        <p class="map__stationPopup_stationInfo" style="color: ${colorScheme[colorScheme.length-1]}">${stationData.name}</p>
+        <p class="map__stationPopup_lineInfo" style="color: ${colorScheme[colorScheme.length-2]}">${stationData.operator}
+        `
+        stationData.line != 'None' ? content = content+` ${stationData.line}</p>` : content = content+' Operated</p>'
+        let surveyInfo = '<ul class="map__stationPopup_text">Years Surveyed'
+        stationData.years.sort((a,b)=> b - a)
+        stationData.years.map(year=>{
+            surveyInfo = surveyInfo+`<li>${year}</li>`
+        })
+        content = content+surveyInfo+'</ul>'
+        // if (props.LINE === 'n/a') content = `<p class="map__stationPopup_stationInfo">${props.STATION} </p><p class="map__stationPopup_lineInfo">${props.OPERATOR} Park and Ride</p>` 
+        // else content = `<p class="map__stationPopup_stationInfo">${props.STATION} Station</p><p class="map__stationPopup_lineInfo">${props.OPERATOR} ${props.LINE}</p>`
+    }
+    else{
+        content = `
+        <p class="map__stationPopup_stationInfo">${event.features[0].properties.STATION}</p>
+        <p class="map__stationPopup_text">This station has not been surveyed<br>in DVRPC's License Plate Survey program.</p>
+        `
+    }
     let popup = new mapboxgl.Popup({
         offset: {
             'top': [0, 0],
@@ -421,12 +444,12 @@ const StationPopup = event =>{
 let stationPopup;
 map.on('mouseover', 'railStations-base', e=>{
     map.getCanvas().style.cursor = 'pointer'
-    map.setFilter('railStations-hover', ['==', 'DVRPC_ID', e.features[0].properties.DVRPC_ID])
+    map.setFilter('railStations-hover', ['==', 'FID', e.features[0].properties.FID])
     stationPopup = StationPopup(e)
 })
 map.on('mouseleave', 'railStations-base', e=>{
     map.getCanvas().style.cursor = ''
-    map.setFilter('railStations-hover', ['==', 'DVRPC_ID', ''])
+    map.setFilter('railStations-hover', ['==', 'FID', ''])
     stationPopup.remove()
 })
 

@@ -267,6 +267,7 @@ main{
     }
     .map__stationPopup{
         text-align: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     .map__stationPopup>.mapboxgl-popup-content>p{
         margin: 1% auto;
@@ -279,6 +280,15 @@ main{
     .map__stationPopup_lineInfo{
         font-size: .8rem;
         color: #aaa;
+    }
+    .map__stationPopup_text{
+        margin: 0;
+        padding: 0;
+        color: #888;
+        line-height: 1rem;
+    }
+    .map__stationPopup_text>li{
+        list-style: none;
     }
 
 
