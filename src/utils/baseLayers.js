@@ -171,7 +171,7 @@ export const baseLayers = {
   railStations: {
     sourceDef: {
       type: 'geojson',
-      data: 'https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/Survey_Locations/FeatureServer/0/query?where=1%3D1&outFields=*&geometryPrecision=4&outSR=4326&f=pgeojson',
+      data: 'https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/0/query?where=1%3D1&outFields=*&geometryPrecision=4&outSR=4326&f=pgeojson',
     },
     layers: {
       base:{
@@ -183,8 +183,8 @@ export const baseLayers = {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
             'circle-color': [
               'match',
-              ['get', 'SURVEYED'],
-              ' ', '#aaa',
+              ['get', 'SURVEY_ID'],
+              0, '#aaa',
               'green'
             ],
             'circle-stroke-color': '#fff',
@@ -199,7 +199,7 @@ export const baseLayers = {
           id: 'railStations-highlight',
           source: 'railStations',
           type: 'circle',
-          filter: ['==', 'DVRPC_ID', ''],
+          filter: ['==', 'SURVEY_ID', ''],
           paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 12, 15],
             'circle-stroke-color': '#155472',
@@ -215,7 +215,7 @@ export const baseLayers = {
           id: 'railStations-hover',
           source: 'railStations',
           type: 'circle',
-          filter: ['==', 'DVRPC_ID', ''],
+          filter: ['==', 'SURVEY_ID', ''],
           paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 3, 12, 6],
             'circle-stroke-color': '#f00',

@@ -329,14 +329,17 @@ input[type="submit"]:hover{
     }
 }
 @media all and (max-width: 750px) {
-    #license-plate-logo, #nav-social-media{
+    #license-plate-logo{
         display: none;
+    }
+    #nav-solical-media{
+        justify-content: center;
     }
     #more-info{
         top: 2%;
         left: 1%;
     }
     .nav-column{
-        width: 100%;
+        width: 66%;
     }
 }

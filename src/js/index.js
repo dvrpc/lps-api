@@ -58,11 +58,12 @@ const ref = new mapboxgl.Map({
 })
 
 map.on('load', e=>{
-    fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/ArcGIS/rest/services/HexBins_StationShed/FeatureServer/0/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
+    fetch('https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/1/query?where=1%3D1&outFields=FID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson')
     .then(response => {
         if (response.ok) {
             response.json()
                 .then(features => {
+
                     map.addSource('hexBins', {
                         type: 'geojson',
                         data: features
@@ -115,7 +116,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             return result * sortOrder
         }
     }
-
     const BuildLegend = (content, colorScheme) => {
         let range = []
         for (let i in content.data) {
@@ -194,8 +194,6 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             i++
         })
     }
-
-
     const GenerateFillFunction = (infoArray, colorScheme) => {
         let info = {
             query: `GRID_ID%20IN%20(`,
@@ -213,46 +211,34 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         })
         return info.stops
     }
+    const GenerateFilterFunction = values =>{
+        let filter = ['any']
+        values.map(v=>{
+            filter.push(['==', ['get', 'FID'], v])
+        })
+        return filter
+    }
 
-
+    // HALF THE FUCKING TIME IT'S FILTERING THE WRONG SHIT WHAT THE FUCK IS GOING ON I HATE THIS SHIT FUCK
     infoArray['data'].sort(SortObjectsByField('count'))
     BuildLegend(infoArray, schemes)
-    if (infoArray.operator.length != 1) {
-
-        return {
-            'id': 'hexBins',
-            'type': 'fill',
-            'source': 'hexBins',
-            'filter': ['match', ['get', 'GRID_ID'], filter, true, false],
-            'paint': {
-                'fill-color': {
-                    property: 'GRID_ID',
-                    type: 'categorical',
-                    default: '#ccc',
-                    stops: GenerateFillFunction(infoArray, colorScheme)
-                },
-                'fill-outline-color': '#888',
-                'fill-opacity': .7
-            }
+    return {
+        'id': 'hexBins',
+        'type': 'fill',
+        'source': 'hexBins',
+        'filter': GenerateFilterFunction(filter),
+        'paint': {
+            'fill-color': {
+                property: 'FID',
+                type: 'categorical',
+                default: '#ccc',
+                stops: GenerateFillFunction(infoArray, colorScheme)
+            },
+            'fill-outline-color': '#888',
+            'fill-opacity': .7
         }
     }
-    else {
-        return {
-            'id': 'hexBins',
-            'type': 'fill',
-            'source': 'hexBins',
-            'filter': ['match', ['get', 'GRID_ID'], filter, true, false],
-            'paint': {
-                'fill-color': {
-                    property: 'GRID_ID',
-                    type: 'categorical',
-                    default: '#ccc',
-                    stops: GenerateFillFunction(infoArray, colorScheme)
-                },
-                'fill-outline-color': '#666'
-            }
-        }
-    }
+    
 }
 
 // function to get station sheds hexagons on submit
@@ -268,30 +254,31 @@ fetch('https://a.michaelruane.com/api/lps/test')
             while (form[1].firstChild) {
                 form[1].removeChild(form[1].firstChild)
             }
-            // get the new station value
-            let station = e.target.value
+            // grab station data
+            let station = data[e.target.value]
             // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
-            data[station].years.sort((a,b)=> b - a )
-            data[station]['years'].forEach(year => {
+            station.years.sort((a,b)=> b - a )
+            station.years.forEach(year => {
                 let option = document.createElement('option')
                 option.value = year
                 option.innerText = year
                 form[1].appendChild(option)
             })
-            if (data[station].id != null) map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', data[station].id]) 
+            if (station.id != null) map.setFilter('railStations-highlight', ['==', 'SURVEY_ID', station.id]) 
             else{
-                map.setFilter('railStations-highlight', ['==', 'DVRPC_ID', ''])
+                map.setFilter('railStations-highlight', ['==', 'SURVEY_ID', ''])
             }
     })
 
         // loop through stations and create a dropdown option for each one
-        jawn.forEach(station => {
-            let k = Object.keys(station)[0].toString(),
-            option = document.createElement('option')
-            option.value = k
-            station[k].line != null ? option.innerHTML = `${k} (${station[k].line})` : option.innerHTML =   `${k} (Park and Ride)`
-            form[0].appendChild(option)
-            data[k] = station[k]
+        jawn.cargo.forEach(station => {
+            if (!data[station.id]){
+                let option = document.createElement('option')
+                option.value = station.id
+                station.line != 'None' ? option.innerHTML = `${station.name} (${station.line})` : option.innerHTML =   `${station.name} (Park and Ride)`
+                form[0].appendChild(option)
+                data[station.id] = station
+            }
         })
         return data
     })
@@ -315,100 +302,98 @@ form.onsubmit = e => {
 
     // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
     let stationInfo = {
-        'name': station,
-        'operator': undefined,
-        'mode': undefined,
+        'name': data[station].name,
+        'operator': data[station].operator,
+        'mode': data[station].mode,
         'year': selectedYear,
         'id': data[station].id,
+        'line': data[station].line,
         'data': [],
         'breaks': []
     }
     // var @data = array returned by fetch on L113 to return summary information about each permutation of commuter shed survey conducted and entered into DB
-    stationInfo['operator'] = data[station].operator
-    let mode = data[station].mode
-    stationInfo['line'] = data[station].line
-    mode.indexOf('(Regional Rail') != -1 ? stationInfo['mode'] = 'Commuter Rail' : stationInfo['mode'] = mode
+    stationInfo.mode.indexOf('(Regional Rail') != -1 ? stationInfo.mode = 'Commuter Rail' : null
+
 
     if (station != 'default') {
-        fetch(`https://a.michaelruane.com/api/lps/query?station=${station}&year=${selectedYear}`)
+        fetch(`https://a.michaelruane.com/api/lps/query?station=${stationInfo.id}&year=${selectedYear}`)
         .then(response => {
             if (response.status == 200) { return response.json() }
         })
         .then(jawn => {
-            if (jawn.code) alert(jawn.error)
-            else {
-                // create filter array for hex tile
-                let hex = []
-                let popupReference = new Object();
-                for (let k in jawn) {
-                    hex.push(jawn[k].id)
-                    popupReference[jawn[k].id] = jawn[k].count
-                    stationInfo['data'].push({
-                        'id': jawn[k].id,
-                        'count': jawn[k].count
-                    })
-                }
-                // style
-                if (map.getSource('hexBins')) {
-                    map.addLayer(HexStyling(stationInfo, schemes, hex), 'railHighlight')
-                    map.on('click', e=>{
-                        if (map.getLayer('hexClick')){
-                            map.removeLayer('hexClick')
-                        }
-                    })
+            // create filter array for hex tile
+            let hex_values = []
+            let popupReference = new Object();
+            jawn.cargo.map(hex=>{
+                hex_values.push(hex.hex_id)
+                popupReference[hex.hex_id] = hex.count
+                stationInfo.data.push({
+                    id: hex.hex_id,
+                    count: hex.count
+                })
+            })
+            // style
+            if (map.getSource('hexBins')) {
+                let style = HexStyling(stationInfo, schemes, hex_values)
+                map.addLayer(style, 'railHighlight')
+                map.on('click', e=>{
+                    if (map.getLayer('hexClick')){
+                        map.removeLayer('hexClick')
+                    }
+                })
 
-                    map.on('click', 'hexBins', e=>{
-                        if (popupReference[e.features[0].properties.GRID_ID]){
-                            let count = popupReference[e.features[0].properties.GRID_ID]
-                            let offsets = {
-                                'top': [0, 0],
-                                'top-left': [0,0],
-                                'top-right': [0,0],
-                                'bottom': [0, -15],
-                                'bottom-left': [0,0],
-                                'bottom-right': [0,0],
-                                'left': [0,0],
-                                'right': [0,0]
-                                }
-                            
-                            const popup = new mapboxgl.Popup({ offset: offsets, className: 'map__hexPopup' })
-                            let colors = schemes[stationInfo.operator][stationInfo.mode]
-                            popup.setLngLat(e.lngLat)
-                                .setHTML(`<p style="color: ${colors[colors.length-1]}">${count} Commuters attributed to this area.</p>`)
-                                .addTo(map)
-                            document.querySelector('.mapboxgl-popup-close-button').addEventListener('click', e=>{
-                                if (map.getLayer('hexClick')){
-                                    map.removeLayer('hexClick')
-                                }
-                            })
-                            for (let node of document.querySelectorAll('.mapboxgl-popup-tip')){
-                                node.style.borderTopColor = colors[0]
+                map.on('click', 'hexBins', e=>{
+                    if (popupReference[e.features[0].properties.GRID_ID]){
+                        let count = popupReference[e.features[0].properties.GRID_ID]
+                        let offsets = {
+                            'top': [0, 0],
+                            'top-left': [0,0],
+                            'top-right': [0,0],
+                            'bottom': [0, -15],
+                            'bottom-left': [0,0],
+                            'bottom-right': [0,0],
+                            'left': [0,0],
+                            'right': [0,0]
                             }
-                            for (let node of document.querySelectorAll('.mapboxgl-popup-content')){
-                                node.style.borderColor = colors[1]
+                        
+                        const popup = new mapboxgl.Popup({ offset: offsets, className: 'map__hexPopup' })
+                        let colors = schemes[stationInfo.operator][stationInfo.mode]
+                        popup.setLngLat(e.lngLat)
+                            .setHTML(`<p style="color: ${colors[colors.length-1]}">${count} Commuters attributed to this area.</p>`)
+                            .addTo(map)
+                        document.querySelector('.mapboxgl-popup-close-button').addEventListener('click', e=>{
+                            if (map.getLayer('hexClick')){
+                                map.removeLayer('hexClick')
                             }
-
-                            map.addLayer({
-                                'id': 'hexClick',
-                                'source': 'hexBins',
-                                'type': 'line',
-                                'filter': ['match', ['get', 'GRID_ID'], e.features[0].properties.GRID_ID, true, false],
-                                'paint': {
-                                    'line-color': '#f00',
-                                    'line-width': 2
-                                }
-                            })
+                        })
+                        for (let node of document.querySelectorAll('.mapboxgl-popup-tip')){
+                            node.style.borderTopColor = colors[0]
                         }
-                    })
-                }
-                const lineName = stationInfo.line
-                map.setFilter('railHighlight', ['==', ['get', 'LINE_NAME'], lineName])
-                let legend = document.querySelector('.legend__body')
-                !legend.classList.contains('visible') ? legend.classList.add('visible') : null
-                let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'DVRPC_ID', data[station].id]})
-                if (extent.length > 0) map.flyTo({ center: extent[0].geometry.coordinates, zoom: 10, speed: 0.3 })
-                else map.flyTo({ center: baseExtent.center, zoom: baseExtent.zoom, speed: 0.3})
+                        for (let node of document.querySelectorAll('.mapboxgl-popup-content')){
+                            node.style.borderColor = colors[1]
+                        }
+
+                        map.addLayer({
+                            'id': 'hexClick',
+                            'source': 'hexBins',
+                            'type': 'line',
+                            'filter': ['match', ['get', 'GRID_ID'], e.features[0].properties.GRID_ID, true, false],
+                            'paint': {
+                                'line-color': '#f00',
+                                'line-width': 2
+                            }
+                        })
+                    }
+                })
             }
+            const lineName = stationInfo.line
+            map.setFilter('railHighlight', ['==', ['get', 'LINE_NAME'], lineName])
+            let legend = document.querySelector('.legend__body')
+            !legend.classList.contains('visible') ? legend.classList.add('visible') : null
+            let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'SURVEY_ID', data[station].id]})
+            if (extent.length > 0) map.flyTo({ center: extent[0].geometry.coordinates, zoom: 10, speed: 0.3 })
+            else map.flyTo({ center: baseExtent.center, zoom: baseExtent.zoom, speed: 0.3})
+            
         })
     }
     else { alert('Please select a station to continue') }
@@ -449,11 +434,6 @@ map.on('mouseleave', 'railStations-base', e=>{
 })
 
 let toggle = document.querySelector('.legend__toggle')
-// toggle.addEventListener('click', e => {
-//     e.preventDefault()
-//     let body = e.target.nextElementSibling
-//     body.classList.toggle('visible')
-// })
 
 // modal clickinator
 const moreInfo = document.querySelector('#more-info')
