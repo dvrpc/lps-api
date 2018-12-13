@@ -138,7 +138,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
         const legendBody = document.querySelector(".legend__body")
 
         // numerical summaries
-        if (content.line == null){
+        if (content.line == 'None'){
             legendBody.innerHTML = `
                 <div class="legend__station-summary">
                     <h1 class="legend__emphasis">${content.name}</h1>
@@ -389,7 +389,6 @@ form.onsubmit = e => {
             map.setFilter('railHighlight', ['==', ['get', 'LINE_NAME'], lineName])
             let legend = document.querySelector('.legend__body')
             !legend.classList.contains('visible') ? legend.classList.add('visible') : null
-            console.log(data[station])
             let extent = map.querySourceFeatures('railStations', {sourceLayer: 'railStations-highlight', filter: ['==', 'SURVEY_ID', data[station].id]})
             if (extent.length > 0) map.flyTo({ center: extent[0].geometry.coordinates, zoom: 10, speed: 0.3 })
             else map.flyTo({ center: baseExtent.center, zoom: baseExtent.zoom, speed: 0.3})
