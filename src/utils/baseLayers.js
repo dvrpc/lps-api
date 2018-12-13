@@ -171,7 +171,7 @@ export const baseLayers = {
   railStations: {
     sourceDef: {
       type: 'geojson',
-      data: 'https://opendata.arcgis.com/datasets/68b970bf65bc411c8a7f8f7b0bb7908d_0.geojson',
+      data: 'https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/0/query?where=1%3D1&outFields=*&geometryPrecision=4&outSR=4326&f=pgeojson',
     },
     layers: {
       base:{
@@ -181,7 +181,12 @@ export const baseLayers = {
           type: 'circle',
           paint : {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
-            'circle-color': '#aaa',
+            'circle-color': [
+              'match',
+              ['get', 'SURVEY_ID'],
+              0, '#aaa',
+              'green'
+            ],
             'circle-stroke-color': '#fff',
             'circle-opacity': .9,
             'circle-stroke-width': .5
@@ -194,12 +199,12 @@ export const baseLayers = {
           id: 'railStations-highlight',
           source: 'railStations',
           type: 'circle',
-          filter: ['==', 'DVRPC_ID', ''],
+          filter: ['==', 'SURVEY_ID', ''],
           paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 12, 15],
-            'circle-stroke-color': '#f00',
+            'circle-stroke-color': '#155472',
             'circle-stroke-width': 1.5,
-            'circle-color': 'yellow',
+            'circle-color': 'green',
             'circle-opacity': .5
           }
         },
@@ -210,12 +215,17 @@ export const baseLayers = {
           id: 'railStations-hover',
           source: 'railStations',
           type: 'circle',
-          filter: ['==', 'DVRPC_ID', ''],
+          filter: ['==', 'SURVEY_ID', ''],
           paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 3, 12, 6],
             'circle-stroke-color': '#f00',
             'circle-stroke-width': 2,
-            'circle-color': '#aaa',
+            'circle-color':  [
+              'match',
+              ['get', 'SURVEYED'],
+              ' ', '#aaa',
+              'green'
+            ],
             'circle-opacity': .9
           }
         },
