@@ -131,7 +131,7 @@ const HexStyling = (infoArray, colorScheme, filter) => {
             let temp = { 'break': [cluster[0], cluster[cluster.length - 1]], 'count': cluster.length, 'features': [] }
             // push GRID_IDs into arrays corresponding to correct classification
             for (let i in content.data) {
-                content.data[i].count >= temp.break[0] && content.data[i].count <= temp.break[1] ? temp.features.push(content.data[i].id) : undefined
+                if ( content.data[i].count >= temp.break[0] && content.data[i].count <= temp.break[1]) temp.features.push(content.data[i].id)
             }
             content.breaks.push(temp)
         })
