@@ -251,6 +251,11 @@ main{
         margin-bottom: 5%;
         width: 80%
     }
+    #legend__lines{
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
 
     /* pop ups */
@@ -266,22 +271,24 @@ main{
     .map__stationPopup>.mapboxgl-popup-content>p{
         margin: 1% auto;
     }
-    .map__stationPopup_stationInfo{
+    .map__stationPopup-stationInfo{
         font-weight: 700;
-        font-size: 1rem;
         color: #999;
+        margin: .25rem;
     }
-    .map__stationPopup_lineInfo{
-        font-size: .8rem;
+    .map__stationPopup-lineInfo{
+        font-size: .9rem;
         color: #aaa;
+        margin: .15rem;
     }
-    .map__stationPopup_text{
+    .map__stationPopup-text{
         margin: 0;
         padding: 0;
-        color: #888;
+        color: #bbb;
+        font-size: .75rem;
         line-height: 1rem;
     }
-    .map__stationPopup_text>li{
+    .map__stationPopup-text>li{
         list-style: none;
     }
 

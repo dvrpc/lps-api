@@ -93,98 +93,159 @@ map.on("load", e => {
     loadLayers(map, baseLayers);
   });
 });
+const PerformQuery = (stationID, year) => {
+  const ClearMap = () => {
+    // clear layers
+    let layers = ["hexBins", "railLayer", "hexClick"];
+    layers.map(layer => (map.getLayer(layer) ? map.removeLayer(layer) : null));
 
-/* HexStyling(id, quartiles, infoArray) -- mmolta, rbeatty
-    @DESC: Styling function for aggregate geometries that will classified into quartiles based on input range
-    @params:
-        @id: 
-            - DATA TYPE: string
-            - DESC: Identifier that will be assigned to the map layer
-        @quartiles: 
-            - DATA TYPE: object
-            - DESC: Object that contains the classification break points that is outputted by the Quartiles function (def: L26)
-        @infoArray: 
-            - DATA TYPE: object
-            - DESC: Object that contains operator and line type information to be used to assign the appropriate color scheme
-    @usage:
-        - L212
-*/
-const HexStyling = (infoArray, colorScheme, filter) => {
-  // sort object by counts
-  const SortObjectsByField = field => {
-    let sortOrder = 1;
-    return (a, b) => {
-      let result = a[field] < b[field] ? -1 : a[field] > b[field] ? 1 : 0;
-      return result * sortOrder;
-    };
+    // clear popups
+    if (document.querySelector(".map__hexPopup"))
+      document.querySelector(".map__hexPopup").parentNode.innerHTML = "";
   };
-  const BuildLegend = (content, colorScheme) => {
-    let range = [];
-    for (let i in content.data) {
-      range.push(content.data[i].count);
-    }
 
-    // create classification
-    const GetUniqueCount = (value, index, self) => {
-      return self.indexOf(value) === index;
-    };
-    let temp =
-      range.filter(GetUniqueCount).length > 4
-        ? ckmeans(range, 4)
-        : ckmeans(range, range.filter(GetUniqueCount).length); //ckmeans, simple-statistics library
-    temp.forEach(cluster => {
-      let temp = {
-        break: [cluster[0], cluster[cluster.length - 1]],
-        count: cluster.length,
-        features: []
-      };
-      // push GRID_IDs into arrays corresponding to correct classification
-      for (let i in content.data) {
-        if (
-          content.data[i].count >= temp.break[0] &&
-          content.data[i].count <= temp.break[1]
-        )
-          temp.features.push(content.data[i].id);
-      }
-      content.breaks.push(temp);
+  const UpdateRailFilter = stationData => {
+    // get all rail lines associated with given station
+    let stationQuery = map.querySourceFeatures("railStations", {
+      sourceLayer: "railStations-base",
+      filter: ["==", ["get", "SURVEY_ID"], stationData.id]
     });
-    const legendBody = document.querySelector(".legend__body");
 
-    // numerical summaries
-    if (content.line == "None") {
-      legendBody.innerHTML = `
-                <div class="legend__station-summary">
-                    <h1 class="legend__emphasis">${content.name}</h1>
-                    <p class="legend__text"><span class="legend__emphasis">${
-                      content.operator
-                    }</span> operated <span class="legend__emphasis">${
-        content.mode
-      }</span>.<br>Currently displaying results for the <span class="legend__emphasis">${
-        content.year
-      }</span> survey.</p>
-                </div>
-                <div class="legend__number-summary">
-                    <div class="legend__summary-container">
-                        <p class="legend__emphasis summary">${range.reduce(
-                          (a, b) => a + b
-                        )}</p>
-                        <p class="legend__text">Total Commuters</p>
-                    </div>
-                </div>
-                <div class="legend__distribution-summary"></div>
-                `;
-    } 
-    else if (content.line == 'PATCO'){
+    // add all rail lines to stationInfo
+    stationQuery.map(station => {
+      let props = station.properties;
+      // workaround because this data is inconsistent and this is easier
+      let thisStation = {
+        name: undefined,
+        operator: props.OPERATOR == "PATCO" ? "DRPA" : props.OPERATOR,
+        mode: props.TYPE
+      };
+      switch (props.LINE) {
+        case "Atlantic City Line":
+          if (
+            stationData.line.ref.indexOf("NJ Transit Atlantic City Line") == -1
+          ) {
+            stationData.line.ref.push("NJ Transit Atlantic City Line");
+            thisStation.name = "NJ Transit Atlantic City Line";
+            stationData.line.info.push(thisStation);
+          }
+          break;
+        case "RiverLine":
+          if (stationInfo.line.ref.indexOf("River LINE") == -1) {
+            stationData.line.ref.push("River LINE");
+            thisStation.name = "River LINE";
+            stationData.line.info.push(thisStation);
+          }
+          break;
+        case "Northeast Corridor":
+          if (stationInfo.line.ref.indexOf("Northeast Corridor Line") == -1) {
+            stationData.line.ref.push("Northeast Corridor Line");
+            thisStation.name = "Northeast Corridor Line";
+            stationData.line.info.push(thisStation);
+          }
+          break;
+        case "Keystone Line":
+          if (stationInfo.line.ref.indexOf("Keystone Corridor") == -1) {
+            stationData.line.ref.push("Keystone Corridor");
+            thisStation.name = "Keystone Corridor";
+            stationData.line.info.push(thisStation);
+          }
+          break;
+        case "Multiple Routes":
+          if (stationInfo.line.ref.indexOf("Amtrak") == -1) {
+            stationData.line.ref.push("Amtrak");
+            thisStation.name = "Amtrak";
+            stationData.line.info.push(thisStation);
+          }
+          break;
+        default:
+          if (stationData.line.ref.indexOf(props.LINE) == -1) {
+            stationData.line.ref.push(props.LINE);
+            thisStation.name = props.LINE;
+            stationData.line.info.push(thisStation);
+          }
+          break;
+      }
+    });
+    // build filter and apply
+    let filterExp = ["any"];
+    stationInfo.line.info.map(line => {
+      let filterStatement = ["==", ["get", "LINE_NAME"], line.name];
+      filterExp.push(filterStatement);
+    });
+    map.setFilter("railHighlight", filterExp);
+  };
+
+  const HexStyling = (infoArray, colorScheme, filter) => {
+    // sort object by counts
+    const SortObjectsByField = field => {
+      let sortOrder = 1;
+      return (a, b) => {
+        let result = a[field] < b[field] ? -1 : a[field] > b[field] ? 1 : 0;
+        return result * sortOrder;
+      };
+    };
+    const BuildLegend = (content, colorScheme) => {
+      let range = [];
+      for (let i in content.data) {
+        range.push(content.data[i].count);
+      }
+
+      // create classification
+      const GetUniqueCount = (value, index, self) => {
+        return self.indexOf(value) === index;
+      };
+
+      let temp =
+        range.filter(GetUniqueCount).length > 4
+          ? ckmeans(range, 4)
+          : ckmeans(range, range.filter(GetUniqueCount).length); //ckmeans, simple-statistics library
+      temp.forEach(cluster => {
+        let temp = {
+          break: [cluster[0], cluster[cluster.length - 1]],
+          count: cluster.length,
+          features: []
+        };
+        // push GRID_IDs into arrays corresponding to correct classification
+        for (let i in content.data) {
+          if (
+            content.data[i].count >= temp.break[0] &&
+            content.data[i].count <= temp.break[1]
+          )
+            temp.features.push(content.data[i].id);
+        }
+        content.breaks.push(temp);
+      });
+      let legendBody = document.querySelector(".legend__body");
+      if (content.mode == "Park and Ride") {
+        legendBody.innerHTML = `
+        <div class="legend__station-summary">
+            <h1 class="legend__emphasis">${content.name}</h1>
+            <p class="legend__text"><span class="legend__emphasis">${
+              content.operator
+            }</span> operated <span class="legend__emphasis">${
+          content.mode
+        }</span>.<br>Currently displaying results for the <span class="legend__emphasis">${
+          content.year
+        }</span> survey.</p>
+        </div>
+        <div class="legend__number-summary">
+            <div class="legend__summary-container">
+                <p class="legend__emphasis summary">${range.reduce(
+                  (a, b) => a + b
+                )}</p>
+                <p class="legend__text">Total Commuters</p>
+            </div>
+        </div>
+        <div class="legend__distribution-summary"></div>
+        `;
+      } else {
         legendBody.innerHTML = `
                       <div class="legend__station-summary">
                           <h1 class="legend__emphasis">${content.name}</h1>
                           <p class="legend__text"><span class="legend__emphasis">${
                             content.operator
-                          }</span> operated <span class="legend__emphasis">${
-          content.mode
-        }</span> station<br>and is served by the <span class="legend__emphasis">${
-          content.line
-        } Speedline</span>.<br>Currently displaying results for the <span class="legend__emphasis">${
+                          }</span> operated station and is served by the following lines:</p><ul id="legend__lines"></ul><p class="legend__text">Currently displaying results for the <span class="legend__emphasis">${
           content.year
         }</span> survey.</p>
                       </div>
@@ -198,132 +259,114 @@ const HexStyling = (infoArray, colorScheme, filter) => {
                       </div>
                       <div class="legend__distribution-summary"></div>
                       `;
-    }
-    else {
-      legendBody.innerHTML = `
-                    <div class="legend__station-summary">
-                        <h1 class="legend__emphasis">${content.name}</h1>
-                        <p class="legend__text"><span class="legend__emphasis">${
-                          content.operator
-                        }</span> operated <span class="legend__emphasis">${
-        content.mode
-      }</span> station<br>and is served by the <span class="legend__emphasis">${
-        content.line
-      }</span>.<br>Currently displaying results for the <span class="legend__emphasis">${
-        content.year
-      }</span> survey.</p>
-                    </div>
-                    <div class="legend__number-summary">
-                        <div class="legend__summary-container">
-                            <p class="legend__emphasis summary">${range.reduce(
-                              (a, b) => a + b
-                            )}</p>
-                            <p class="legend__text">Total Commuters</p>
-                        </div>
-                    </div>
-                    <div class="legend__distribution-summary"></div>
-                    `;
-    }
-    content.name == "Wissinoming" || content.name == "Lamokin Street"
-      ? (legendBody.innerHTML =
-          legendBody.innerHTML +
-          '<div style="order: 4"><p class="legend__text legend__emphasis">* This station is no longer operational.</p></div>')
-      : null;
-    // set colors appropriately based on operator/mode scheme system
-    const emphasis = document.querySelectorAll(".legend__emphasis");
-    emphasis.forEach(node => {
-      node.style.color = colorScheme[content.operator][content.mode][2];
-    });
-
-    // create legend boxes
-    let i = 0;
-    colorScheme[content.operator][content.mode].forEach(classification => {
-        if (content.breaks[i]){
-            const container = document.querySelector(".legend__distribution-summary"),
-              legendItem = document.createElement("div"),
-              height = 100/content.breaks.length,
-              breakValue = content.breaks[i]["break"][1];
-            legendItem.style.cssText =
-              i < 2
-                ? `width: ${height}%; background-color: ${classification};`
-                : `width: ${height}%; background-color: ${classification}; color: white;`;
-            
-              if (i == 0){
-                  legendItem.innerHTML = breakValue == 1 ? `<p>${breakValue}</p>` : `<p>1 – ${breakValue}</p>`
-                  container.appendChild(legendItem);
-              }
-              else{
-                  let range = (breakValue - (content.breaks[i-1]["break"][1])) > 1 ? `<p>${content.breaks[i-1]["break"][1]+1} – ${breakValue}</p>` : `<p>${breakValue}</p>`
-                  legendItem.innerHTML = range;
-                  container.appendChild(legendItem);
-              }
-            i++;
-        }
-    });
-  };
-  const GenerateFillFunction = (infoArray, colorScheme) => {
-    let info = {
-      query: `GRID_ID%20IN%20(`,
-      stops: []
-    };
-    Object.keys(infoArray.breaks).forEach(key => {
-      infoArray.breaks[key].features.forEach(feature => {
-        info.stops.push([
-          feature,
-          colorScheme[infoArray.operator][infoArray.mode][key]
-        ]);
+        let legendLines = legendBody.querySelector("#legend__lines");
+        content.line.info.map(line => {
+          let list = document.createElement("li"),
+            color = schemes[line.operator][line.mode][3];
+  
+          list.innerHTML = `${line.name} <span style='font-weight: 400'>(${
+            line.mode
+          })</span>`;
+          list.setAttribute("style", `font-weight: 700; color: ${color}`);
+          legendLines.append(list);
+        });
+      }
+      content.name == "Wissinoming" || content.name == "Lamokin Street"
+        ? (legendBody.innerHTML =
+            legendBody.innerHTML +
+            '<div style="order: 4"><p class="legend__text legend__emphasis">* This station is no longer operational.</p></div>')
+        : null;
+      // set colors appropriately based on operator/mode scheme system
+      const emphasis = document.querySelectorAll(".legend__emphasis");
+      emphasis.forEach(node => {
+        node.style.color = colorScheme[content.operator][content.mode][2];
       });
-    });
-    let i = 1;
-    infoArray.data.forEach(feature => {
-      i != infoArray.data.length
-        ? (info.query = `${info.query} '${feature.id}',`)
-        : (info.query = `${info.query} '${feature.id}')`);
-      i++;
-    });
-    return info.stops;
-  };
-  const GenerateFilterFunction = values => {
-    let filter = ["any"];
-    values.map(v => {
-      filter.push(["==", ["get", "FID"], v]);
-    });
-    return filter;
+
+      // create legend boxes
+      let i = 0;
+      colorScheme[content.operator][content.mode].forEach(classification => {
+        if (content.breaks[i]) {
+          const container = document.querySelector(
+              ".legend__distribution-summary"
+            ),
+            legendItem = document.createElement("div"),
+            height = 100 / content.breaks.length,
+            breakValue = content.breaks[i]["break"][1];
+          legendItem.style.cssText =
+            i < 2
+              ? `width: ${height}%; background-color: ${classification};`
+              : `width: ${height}%; background-color: ${classification}; color: white;`;
+
+          if (i == 0) {
+            legendItem.innerHTML =
+              breakValue == 1
+                ? `<p>${breakValue}</p>`
+                : `<p>1 – ${breakValue}</p>`;
+            container.appendChild(legendItem);
+          } else {
+            let range =
+              breakValue - content.breaks[i - 1]["break"][1] > 1
+                ? `<p>${content.breaks[i - 1]["break"][1] +
+                    1} – ${breakValue}</p>`
+                : `<p>${breakValue}</p>`;
+            legendItem.innerHTML = range;
+            container.appendChild(legendItem);
+          }
+          i++;
+        }
+      });
+    };
+    const GenerateFillFunction = (infoArray, colorScheme) => {
+      let info = {
+        query: `GRID_ID%20IN%20(`,
+        stops: []
+      };
+      Object.keys(infoArray.breaks).forEach(key => {
+        infoArray.breaks[key].features.forEach(feature => {
+          info.stops.push([
+            feature,
+            colorScheme[infoArray.operator][infoArray.mode][key]
+          ]);
+        });
+      });
+      let i = 1;
+      infoArray.data.forEach(feature => {
+        i != infoArray.data.length
+          ? (info.query = `${info.query} '${feature.id}',`)
+          : (info.query = `${info.query} '${feature.id}')`);
+        i++;
+      });
+      return info.stops;
+    };
+    const GenerateFilterFunction = values => {
+      let filter = ["any"];
+      values.map(v => {
+        filter.push(["==", ["get", "FID"], v]);
+      });
+      return filter;
+    };
+
+    infoArray["data"].sort(SortObjectsByField("count"));
+    BuildLegend(infoArray, schemes);
+    return {
+      id: "hexBins",
+      type: "fill",
+      source: "hexBins",
+      filter: GenerateFilterFunction(filter),
+      paint: {
+        "fill-color": {
+          property: "FID",
+          type: "categorical",
+          default: "#ccc",
+          stops: GenerateFillFunction(infoArray, colorScheme)
+        },
+        "fill-outline-color": "#888",
+        "fill-opacity": 0.7
+      }
+    };
   };
 
-  infoArray["data"].sort(SortObjectsByField("count"));
-  BuildLegend(infoArray, schemes);
-  return {
-    id: "hexBins",
-    type: "fill",
-    source: "hexBins",
-    filter: GenerateFilterFunction(filter),
-    paint: {
-      "fill-color": {
-        property: "FID",
-        type: "categorical",
-        default: "#ccc",
-        stops: GenerateFillFunction(infoArray, colorScheme)
-      },
-      "fill-outline-color": "#888",
-      "fill-opacity": 0.7
-    }
-  };
-};
-const PerformQuery = (stationID, year) => {
-  // check if a layer exists on the map already & remove it
-  if (map.getLayer("hexBins")) {
-    map.removeLayer("hexBins");
-  }
-  if (map.getLayer("railLayer")) {
-    map.removeLayer("railLayer");
-  }
-  if (document.querySelector(".map__hexPopup")) {
-    map.removeLayer("hexClick");
-    let popup = document.querySelector(".map__hexPopup");
-    popup.parentNode.removeChild(popup);
-  }
-  if (stationID) map.setFilter('railStations-highlight', ['==', 'SURVEY_ID', stationID])
+  ClearMap();
 
   // info to pass to HexStyling function (L212) to apply appropriate color scheme to results
   let stationInfo = {
@@ -332,7 +375,10 @@ const PerformQuery = (stationID, year) => {
     mode: data[stationID].mode,
     year: year,
     id: data[stationID].id,
-    line: data[stationID].line,
+    line: {
+      ref: [],
+      info: []
+    },
     data: [],
     breaks: []
   };
@@ -351,6 +397,7 @@ const PerformQuery = (stationID, year) => {
         }
       })
       .then(jawn => {
+        UpdateRailFilter(stationInfo);
         // create filter array for hex tile
         let hex_values = [];
         let popupReference = new Object();
@@ -362,16 +409,23 @@ const PerformQuery = (stationID, year) => {
             count: hex.count
           });
         });
+
         // style
         if (map.getSource("hexBins")) {
           let style = HexStyling(stationInfo, schemes, hex_values);
           map.addLayer(style, "railHighlight");
-          map.on('mouseover', 'hexBins', e=> map.getCanvas().style.cursor = 'pointer')
-          map.on('mouseleave', 'hexBins', e=> map.getCanvas().style.cursor = '' )
+          map.on(
+            "mouseover",
+            "hexBins",
+            e => (map.getCanvas().style.cursor = "pointer")
+          );
+          map.on(
+            "mouseleave",
+            "hexBins",
+            e => (map.getCanvas().style.cursor = "")
+          );
           map.on("click", e => {
-            if (map.getLayer("hexClick")) {
-              map.removeLayer("hexClick");
-            }
+            if (map.getLayer("hexClick")) map.removeLayer("hexClick");
           });
 
           map.on("click", "hexBins", e => {
@@ -432,97 +486,137 @@ const PerformQuery = (stationID, year) => {
             }
           });
         }
-        const lineName = stationInfo.line;
-        map.setFilter("railHighlight", ["==", ["get", "LINE_NAME"], lineName]);
+
+        // open legend on query
         let legend = document.querySelector(".legend__body");
         !legend.classList.contains("visible")
           ? legend.classList.add("visible")
           : null;
+
+        // move map extent to station
         let extent = map.querySourceFeatures("railStations", {
           sourceLayer: "railStations-highlight",
-          filter: ["==", "SURVEY_ID", stationID]
+          filter: ["==", ["get", "SURVEY_ID"], stationInfo.id]
         });
-        if (extent.length > 0)
-          map.flyTo({
-            center: extent[0].geometry.coordinates,
-            zoom: 10,
-            speed: 0.3
-          });
-        else
-          map.flyTo({
-            center: baseExtent.center,
-            zoom: baseExtent.zoom,
-            speed: 0.3
-          });
+        map.flyTo({
+          center: extent[0].geometry.coordinates,
+          zoom: 10,
+          speed: 0.3
+        });
       });
   } else {
     alert("Please select a station to continue");
   }
 };
 const StationPopup = event => {
+  const SurveyedPopup = (props, colors, event) => {
+    const Name = data => {
+      let title = document.createElement("h2");
+      title.classList.add("map__stationPopup-stationInfo");
+      title.style.color = colors[colors.length - 1];
+      title.innerText = data.name;
+
+      return title;
+    };
+    const LineInfo = props => {
+      let line = document.createElement("p"),
+        colorScheme =
+          props.OPERATOR == "PATCO"
+            ? schemes.DRPA["Rapid Transit"]
+            : schemes[props.OPERATOR][props.TYPE];
+      line.classList.add("map__stationPopup-lineInfo");
+      line.style.color = colorScheme[colorScheme.length - 2];
+      switch (props.LINE) {
+        case "null":
+          line.innerText = `${props.OPERATOR} Operated Park and Ride`;
+          break;
+        case "PATCO":
+          line.innerText = "PATCO Speedline";
+          break;
+        case "SEPTA Main Line":
+          line.innerText = props.LINE;
+          break;
+        default:
+          line.innerText = `${props.OPERATOR} ${props.LINE}`;
+          break;
+      }
+      return line;
+    };
+    const SurveyInfo = data => {
+      let container = document.createElement("ul");
+      container.classList.add("map__stationPopup-text");
+      container.innerText = "Years Surveyed";
+      data.years.sort((a, b) => b - a);
+      data.years.map(year => {
+        let list = document.createElement("li");
+        list.innerText = year;
+        container.appendChild(list);
+      });
+
+      return container;
+    };
+
+    let stationData = data[props.SURVEY_ID],
+      content = document.createElement("div"),
+      title = Name(stationData),
+      survey = SurveyInfo(stationData);
+
+    content.appendChild(title);
+    event.features.map(station => {
+      let line = LineInfo(station.properties);
+      content.appendChild(line);
+    });
+    content.appendChild(survey);
+    return content.innerHTML;
+  };
+  const NotSurveyedPopup = (props, event) => {
+    const Name = data => {
+      let title = document.createElement("h2");
+      title.classList.add("map__stationPopup-stationInfo");
+      title.innerText = data.STATION;
+      return title;
+    };
+    const LineInfo = props => {
+      let line = document.createElement("p");
+      line.classList.add("map__stationPopup-lineInfo");
+      switch (props.LINE) {
+        case "null":
+          line.innerText = `${props.OPERATOR} Operated Park and Ride`;
+          break;
+        case "PATCO":
+          line.innerText = "PATCO Speedline";
+          break;
+        case "SEPTA Main Line":
+          line.innerText = "SEPTA Main Line";
+          break;
+        default:
+          line.innerText = `${props.OPERATOR} ${props.LINE}`;
+          break;
+      }
+      return line;
+    };
+    let content = document.createElement("div"),
+      title = Name(props);
+
+    content.appendChild(title);
+    event.features.map(station => {
+      let line = LineInfo(station.properties);
+      content.appendChild(line);
+    });
+    content.innerHTML =
+      content.innerHTML +
+      '<p class="map__stationPopup-text">This station has not been surveyed <br>as part of DVRPC\'s License Plate Survey Program.</p>';
+
+    return content.innerHTML;
+  };
   let content;
   if (data[event.features[0].properties.SURVEY_ID]) {
     let stationData = data[event.features[0].properties.SURVEY_ID];
     let colorScheme = schemes[stationData.operator][stationData.mode];
-    if (stationData.line == "None") {
-      content = `
-            <p class="map__stationPopup_stationInfo" style="color: ${
-              colorScheme[colorScheme.length - 1]
-            }">${stationData.name}</p>
-            <p class="map__stationPopup_lineInfo" style="color: ${
-              colorScheme[colorScheme.length - 2]
-            }">${stationData.operator} Operated</p>
-            `;
-    } else if (stationData.line == "PATCO") {
-      content = `
-            <p class="map__stationPopup_stationInfo" style="color: ${
-              colorScheme[colorScheme.length - 1]
-            }">${stationData.name}</p>
-            <p class="map__stationPopup_lineInfo" style="color: ${
-              colorScheme[colorScheme.length - 2]
-            }">PATCO Speedline</p>
-            `;
-    } else {
-      content = `
-            <p class="map__stationPopup_stationInfo" style="color: ${
-              colorScheme[colorScheme.length - 1]
-            }">${stationData.name}</p>
-            <p class="map__stationPopup_lineInfo" style="color: ${
-              colorScheme[colorScheme.length - 2]
-            }">${stationData.operator} ${stationData.line}</p>
-            `;
-    }
-
-    let surveyInfo = '<ul class="map__stationPopup_text">Years Surveyed';
-    stationData.years.sort((a, b) => b - a);
-    stationData.years.map(year => {
-      surveyInfo = surveyInfo + `<li>${year}</li>`;
-    });
-    content = content + surveyInfo + "</ul>";
+    content = SurveyedPopup(event.features[0].properties, colorScheme, event);
   } else {
     let props = event.features[0].properties;
-    if (props.LINE == "null") {
-      content = `
-            <p class="map__stationPopup_stationInfo">${props.STATION}</p>
-            <p class="map__stationPopup_text">This station has not been surveyed<br>in DVRPC's License Plate Survey program.</p>
-            `;
-    } else if (props.LINE == "PATCO") {
-      content = `
-            <p class="map__stationPopup_stationInfo">${props.STATION}</p>
-            <p class="map__stationPopup_lineInfo">${
-              props.OPERATOR
-            } Speedline</p>
-            <p class="map__stationPopup_text">This station has not been surveyed<br>in DVRPC's License Plate Survey program.</p>
-            `;
-    } else {
-      content = `
-            <p class="map__stationPopup_stationInfo">${props.STATION}</p>
-            <p class="map__stationPopup_lineInfo">${props.OPERATOR} ${
-        props.LINE
-      }</p>
-            <p class="map__stationPopup_text">This station has not been surveyed<br>in DVRPC's License Plate Survey program.</p>
-            `;
-    }
+    content = NotSurveyedPopup(props, event);
   }
   let popup = new mapboxgl.Popup({
     offset: {
@@ -546,12 +640,12 @@ const StationPopup = event => {
 
 // function to get station sheds hexagons on submit
 const form = document.querySelector("#main-form");
-form.onsubmit = e =>{
-    e.preventDefault()
-    let station = form[0].value,
-        year = form[1].value
-    PerformQuery(station, year)
-}
+form.onsubmit = e => {
+  e.preventDefault();
+  let station = form[0].value,
+    year = form[1].value;
+  PerformQuery(station, year);
+};
 let data = new Object();
 // populate dropdowns with possible query values
 fetch("https://a.michaelruane.com/api/lps/test")
@@ -577,6 +671,11 @@ fetch("https://a.michaelruane.com/api/lps/test")
         option.innerText = year;
         form[1].appendChild(option);
       });
+      map.setFilter("railStations-highlight", [
+        "==",
+        ["get", "SURVEY_ID"],
+        station.id
+      ]);
     });
 
     // loop through stations and create a dropdown option for each one
@@ -598,26 +697,29 @@ fetch("https://a.michaelruane.com/api/lps/test")
 
 let stationPopup;
 
-map.on('click', 'railStations-base', e=>{
-    let props = e.features[0].properties
-    if (props.SURVEY_ID > 0){
-      // perform query
-      let station = props.SURVEY_ID,
-      year = data[props.SURVEY_ID].years[0]
-      PerformQuery(station, year)
+map.on("click", "railStations-base", e => {
+  let props = e.features[0].properties;
+  if (props.SURVEY_ID > 0) {
+    map.setFilter("railStations-highlight", [
+      "==",
+      ["get", "SURVEY_ID"],
+      props.SURVEY_ID
+    ]);
+    // perform query
+    let station = props.SURVEY_ID,
+      year = data[props.SURVEY_ID].years[0];
+    PerformQuery(station, year);
 
-      // populate form
-      let form = document.querySelector('#main-form')
-      form[0].value = station
-      form[1].value = year
-      form[1].innerHTML = `<option>${year}</option>`
-
-
-    }
-
-})
+    // populate form
+    let form = document.querySelector("#main-form");
+    form[0].value = station;
+    form[1].value = year;
+    form[1].innerHTML = `<option>${year}</option>`;
+  }
+});
 map.on("mouseover", "railStations-base", e => {
-    if (e.features[0].properties.SURVEY_ID > 0) map.getCanvas().style.cursor = "pointer";
+  if (e.features[0].properties.SURVEY_ID > 0)
+    map.getCanvas().style.cursor = "pointer";
   map.setFilter("railStations-hover", [
     "==",
     "OBJECTID",

@@ -224,7 +224,7 @@ export const baseLayers = {
               'match',
               ['get', 'SURVEYED'],
               ' ', '#aaa',
-              'green'
+              'yellow'
             ],
             'circle-opacity': .9
           }
