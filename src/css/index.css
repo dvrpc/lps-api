@@ -37,7 +37,7 @@ nav{
     height: 10%;
 }
 #license-plate-logo{
-    height:100%;
+    height:85%;
 }
 #more-info{
     font-size: 1.5rem;
@@ -101,18 +101,18 @@ nav{
 .nav-column{
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-end;
     position: absolute;
     right: 2%;
+    width: 50%;
 }
 form{
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     align-items: center;
     height: 100%;
-    margin-right: 5%;
     font-weight: 700;
-    width: 50vw;
+    width: 100%;
 }
 select{
     margin: 0 1%;
