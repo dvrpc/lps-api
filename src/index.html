@@ -6,7 +6,7 @@
     <meta name="Title" content="DVRPC Station Shed Viewer" />
     <meta
       name="Description"
-      content="View results for a survey of cars at rail stations in the DVRPC region and gain and understanding of where railway commuters are coming from"
+      content="View results for vehicle surveys conducted at rail stations and park-and-ride lots in the DVRPC region and gain an understanding of where railway commuters are coming from"
     />
     <meta
       name="Keywords"
@@ -49,61 +49,108 @@
       <i class="fas fa-info-circle" id="more-info" tabindex="12"></i>
 
       <div id="modal">
-        <div id="modal-content">
+        <div id="modal-container">
           <span id="close-modal">&times;</span>
-          <h2>Methodology</h2>
-          <p>
-            This web map shows trip origins for transit users that drive to and
-            park motor vehicles at train stations or park-and-ride lots in the
-            Delaware Valley Region. This map only includes train stations and
-            park-and-rides that have publicly accessible parking and have been
-            surveyed by DVRPC. Each station’s data is based on fieldwork
-            completed in one day, typically in fall or spring between the hours
-            of 9 AM and 4 PM. License plates are recorded and sent to the
-            appropriate federal agency to be anonymously geocoded. After
-            receiving the geocoded records, DVRPC converts the data into a GIS
-            format in order to be used internally and in this application. To
-            ensure privacy of the surveyed vehicles, individual points are
-            aggregated to a standard geography in order to visualize trends of
-            how people are using public transportation as part of their commute.
-            In this case, the standard geography we decided on were 1/2 square
-            mile hexagons that are large enough to anonymize the points within
-            them, but also small enough to effectively display the trends in the
-            data.
-          </p>
+          <ul class="modal-tabs">
+            <li class="modal-link active" tabindex="1">Methodology</li>
+            <li class="modal-link" tabindex="2">Directions</li>
+            <li class="modal-link" tabindex="3">Disclaimer</li>
+            <li class="modal-link" tabindex="4">Contact</li>
+          </ul>
+          <div class="modal-content visible" id="modal-methodology" aria-hidden="false">
+            <p>
+              This web map shows trip origins for transit users that drive to and
+              park motor vehicles at train stations or park-and-ride lots in the
+              Delaware Valley Region. This map only includes train stations and
+              park-and-rides that have publicly accessible parking and have been
+              surveyed by DVRPC. Each station’s data is based on fieldwork
+              completed in one day, typically in fall or spring between the hours
+              of 9 AM and 4 PM.
+            </p>
+            <p>
+              License plates are recorded and sent to the
+              appropriate federal agency to be anonymously geocoded. After
+              receiving the geocoded records, DVRPC converts the data into a GIS
+              format in order to be used internally and in this application. To
+              ensure privacy of the surveyed vehicles, individual points are
+              aggregated to a standard geography in order to visualize trends of
+              how people are using public transportation as part of their commute.
+              In this case, the standard geography we decided on were 1/2 square
+              mile hexagons that are large enough to anonymize the points within
+              them, but also small enough to effectively display the trends in the
+              data.
+            </p>
+          </div>
+          <div class="modal-content" id="modal-directions" aria-hidden="true">
+            <ol>
+              <h4>
+                Dropdown Query
+              </h4>
+              <li>
+                Using the Search Stations drop down, choose a station from the
+                list.
+              </li>
 
-          <h2>Directions</h2>
+              <li>Next, chose a data collection year and press search.</li>
 
-          <ol>
-            <li>
-              Using the Search Stations drop down, choose a station from the
-              list.
-            </li>
+              <li>
+                Once the data is displayed users can click on the box titled
+                “legend” in the top left corner of the map to open a drop down.
+                The drop down provides information including the station’s
+                operator, the name and type of transit line, the total number of
+                car commuters surveyed, and the values associated with each tile
+                color. Users can zoom in or out using the scroll wheel on the
+                mouse or by double clicking on a location.
+              </li>
+            </ol>
+            <ol>
+              <h4>
+                Click Query
+              </h4>
+              <li>
+                Using your mouse, you can hover over the station points located on
+                the map to bring up a popup with more information pertaining to it.
+                Stations symbolized <strong style="color: green">green</strong>
+                have been surveyed as part of this DVRPC initiative, while those 
+                symbolized <strong style="color: #aaa">grey</strong> have not.
+              </li>
 
-            <li>Next, chose a data collection year and press search.</li>
-
-            <li>
-              Once the data is displayed users can click on the box titled
-              “legend” in the top left corner of the map to open a drop down.
-              The drop down provides information including the station’s
-              operator, the name and type of transit line, the total number of
-              car commuters surveyed, and the values associated with each tile
-              color. Users can zoom in or out using the scroll wheel on the
-              mouse or by double clicking on a location.
-            </li>
-          </ol>
-          <h2>Disclaimer</h2>
-          <p>
-            This web page is a public resource of general information. The
-            Delaware Valley Regional Planning Commission (DVRPC) makes no
-            warranty, representation, or guarantee as to the content, sequence,
-            accuracy, timeliness, or completeness of any of the spatial data or
-            database information provided herein. DVRPC and partner state,
-            local, and other agencies shall assume no liability for errors,
-            omissions, or inaccuracies in the information provided regardless of
-            how caused; or any decision made or action taken or not taken by any
-            person relying on any information or data furnished within.
-          </p>
+              <li>
+                By clicking on a <strong style="color: green">surveyed</strong>
+                station, you will perform a query using that station and the year 
+                of its most recent survey.
+              </li>
+            </ol>
+          </div>
+          <div class="modal-content" id="modal-disclaimer" aria-hidden="true">
+            <p>
+              This web page is a public resource of general information. The
+              Delaware Valley Regional Planning Commission (DVRPC) makes no
+              warranty, representation, or guarantee as to the content, sequence,
+              accuracy, timeliness, or completeness of any of the spatial data or
+              database information provided herein. DVRPC and partner state,
+              local, and other agencies shall assume no liability for errors,
+              omissions, or inaccuracies in the information provided regardless of
+              how caused; or any decision made or action taken or not taken by any
+              person relying on any information or data furnished within.
+            </p>
+          </div>
+          <div class="modal-content" id="modal-contact" aria-hidden="true">
+            <p>
+              For questions, comments, or concerns regarding this project please use the following 
+              contact information
+            </p>
+            <p>
+                <h3><strong style="color: #155472">Thom Stead</strong></h3>
+                <h4><em style="font-weight: 400; color: #5ca3cb">Transportation Planner</em></h4>
+                E-mail: <a href="mailto:tstead@dvrpc.org" alt='primary email contact' target="_blank" rel="noopener">tstead@dvrpc.org</a></br>
+                Phone: 215.238.2851
+            </p>
+            <p>
+              To log an issue or provide feedback on this application, please visit this project's <a href="https://github.com/dvrpc/license-plate-survey/issues" target="_blank" rel="noopener">GitHub Repository</a>.
+            </p>
+            </p>
+          </div>
         </div>
       </div>
 
@@ -158,7 +205,7 @@
         />
       </a>
 
-      <a id="mailto" href="mailto:tstead@dvrpc.org/" tabindex="6">
+      <a  href="https://signup.e2ma.net/signup/1808352/1403728/" target="_blank" rel="noopener" tabindex="6">
         <img
           class="nav-imgs"
           src="<%- require('./img/navbar/email.png')%>"
@@ -219,7 +266,7 @@
       </a>
 
       <a
-        href="https://www.youtube.com/user/DVRPC"
+        href="https://www.youtube.com/channel/UCEU8UI5_iGkVypHP93b5jLA"
         target="_blank"
         rel="noopener"
         tabindex="11"
