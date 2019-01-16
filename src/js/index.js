@@ -739,6 +739,9 @@ let toggle = document.querySelector(".legend__toggle");
 const moreInfo = document.querySelector("#more-info");
 const modal = document.querySelector("#modal");
 const close = document.querySelector("#close-modal");
+const modalTabs = document.querySelectorAll(".modal-tabs li")
+
+
 
 const AriaHide = element => {
   element.classList.remove("visible");
@@ -750,6 +753,23 @@ const AriaShow = element => {
   element.setAttribute("aria-hidden", "false");
 };
 
+const ModalLinkNav = e =>{
+  for (let link of modalTabs){
+    let target = document.querySelector(`#modal-${link.textContent.toLowerCase()}`)
+    if (link == e.target){
+      link.classList.add('active')
+      AriaShow(target)
+    }
+    else {
+      link.classList.remove('active')
+      AriaHide(target)
+    }
+  }
+}
+// modal navigation
+for (let link of modalTabs){
+  link.addEventListener('click', e=>{ ModalLinkNav(e)})
+}
 // open the modal
 moreInfo.onclick = () =>
   (modal.style.display = "none" ? AriaShow(modal) : AriaHide(modal));
@@ -773,4 +793,5 @@ document.onkeydown = e => {
       ? AriaHide(toggle.nextElementSibling)
       : AriaShow(toggle.nextElementSibling);
   }
+  if (e.target.classList.contains('modal-link')){ ModalLinkNav(e) }
 };
