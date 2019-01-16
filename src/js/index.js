@@ -100,8 +100,8 @@ const PerformQuery = (stationID, year) => {
     layers.map(layer => (map.getLayer(layer) ? map.removeLayer(layer) : null));
 
     // clear popups
-    if (document.querySelector(".map__hexPopup"))
-      document.querySelector(".map__hexPopup").parentNode.innerHTML = "";
+    let hexPop = document.querySelector('.map__hexPopup')
+    if (hexPop) hexPop.parentNode.removeChild(hexPop)
   };
 
   const UpdateRailFilter = stationData => {
