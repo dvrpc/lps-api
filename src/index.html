@@ -20,12 +20,6 @@
     <!-- external files -->
     <link
       rel="stylesheet"
-      href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
-      integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
-      crossorigin="anonymous"
-    />
-    <link
-      rel="stylesheet"
       type="text/css"
       href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css"
     />
@@ -37,6 +31,8 @@
       type="text/javascript"
       src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js"
     ></script>
+    <!-- <script>var _gaq = [['_setAccount', 'UA-9825778-1'], ['_trackPageview']];</script>
+    <script async src="//www.google-analytics.com/ga.js"></script> -->
   </head>
   <body>
     <nav>
@@ -46,16 +42,17 @@
         alt="License Plate Survey logo"
       />
 
-      <i class="fas fa-info-circle" id="more-info" tabindex="12"></i>
+      <p id="more-info">i</p>
 
       <div id="modal">
         <div id="modal-container">
           <span id="close-modal">&times;</span>
           <ul class="modal-tabs">
-            <li class="modal-link active" tabindex="1">Methodology</li>
-            <li class="modal-link" tabindex="2">Directions</li>
-            <li class="modal-link" tabindex="3">Disclaimer</li>
-            <li class="modal-link" tabindex="4">Contact</li>
+            <li class="modal-link active" >Methodology</li>
+            <li class="modal-link" >Directions</li>
+            <li class="modal-link" >Legend</li>
+            <li class="modal-link" >Disclaimer</li>
+            <li class="modal-link" >Contact</li>
           </ul>
           <div class="modal-content visible" id="modal-methodology" aria-hidden="false">
             <p>
@@ -69,13 +66,13 @@
             </p>
             <p>
               License plates are recorded and sent to the
-              appropriate federal agency to be anonymously geocoded. After
+              appropriate state agency to be anonymously geocoded. After
               receiving the geocoded records, DVRPC converts the data into a GIS
               format in order to be used internally and in this application. To
               ensure privacy of the surveyed vehicles, individual points are
               aggregated to a standard geography in order to visualize trends of
               how people are using public transportation as part of their commute.
-              In this case, the standard geography we decided on were 1/2 square
+              In this case, the standard geography is 1/2 square
               mile hexagons that are large enough to anonymize the points within
               them, but also small enough to effectively display the trends in the
               data.
@@ -90,17 +87,17 @@
                 Using the Search Stations drop down, choose a station from the
                 list.
               </li>
-
+              
               <li>Next, chose a data collection year and press search.</li>
-
+              
               <li>
-                Once the data is displayed users can click on the box titled
-                “legend” in the top left corner of the map to open a drop down.
+                Once the data is displayed, the
+                “legend” in the top left corner of the map opens as a drop down element.
                 The drop down provides information including the station’s
                 operator, the name and type of transit line, the total number of
                 car commuters surveyed, and the values associated with each tile
-                color. Users can zoom in or out using the scroll wheel on the
-                mouse or by double clicking on a location.
+                color. The display of this legend can be toggled by clicking the on the title bar. Users can zoom in or out using the scroll wheel on the
+                mouse or by double clicking on a location, and can return to the default regional extent by clicking on the DVRPC logo in the bottom-most button.
               </li>
             </ol>
             <ol>
@@ -114,13 +111,31 @@
                 have been surveyed as part of this DVRPC initiative, while those 
                 symbolized <strong style="color: #aaa">grey</strong> have not.
               </li>
-
+              
               <li>
                 By clicking on a <strong style="color: green">surveyed</strong>
                 station, you will perform a query using that station and the year 
                 of its most recent survey.
               </li>
             </ol>
+          </div>
+          <div class="modal-content" id="modal-legend" aria-hidden="true">
+            <div id="modal-legend-stations">
+              <div>
+                <h4>Passenger Rail Stations</h4>
+                <div class="modal-legend-station">
+                  <p>Surveyed Station</p>
+                  <p>Unsurveyed Station</p>
+                </div>
+                <div class="modal-legend-station">
+                  <div id="surveyed"></div>
+                  <div id="not-surveyed"></div>
+                </div>
+              </div>
+            </div>
+            <h4>Passenger Rail Lines</h4>
+            <div id="modal-legend-rail">
+            </div>
           </div>
           <div class="modal-content" id="modal-disclaimer" aria-hidden="true">
             <p>
@@ -156,22 +171,20 @@
 
       <div class="nav-column">
         <form id="main-form">
-          <p>Search Stations:</p>
-          <select name="station" tabindex="1">
+          <select name="station" aria-label="Select Station">
             <!-- Build station/year query based on look up table -->
             <option value="default" selected
-              >Please Select a Station to Continue</option
+              label="Please Select a Station to Continue"></option
             >
           </select>
 
-          <select name="year" tabindex="2">
-            <option value="default" selected>--</option>
+          <select name="year" aria-label="Select Year">
+            <option value="default" label="Year" selected></option>
           </select>
 
           <input
             type="submit"
             value="Search"
-            tabindex="3"
             aria-label="Search"
           />
         </form>
@@ -180,32 +193,31 @@
 
     <main role="main" id="map">
       <div class="legend__container">
-        <p class="legend__toggle" tabindex="4">Legend</p>
+        <p class="legend__toggle" >Legend</p>
         <div class="legend__body" aria-hidden="true">
           <span>
             <h2>Nothing to display!</h2>
-            <h4>please conduct a search to continue</h4>
+            <h4>Please conduct a search to continue</h4>
           </span>
-          <span id="cat-loading"></span>
+          <img id="cat-loading" src="./img/cat.gif" alt="Cat Loading GIF"/>
         </div>
       </div>
     </main>
+
     <footer id="nav-social-media">
       <a
         href="https://www.dvrpc.org"
         target="_blank"
         rel="noopener"
-        tabindex="5"
       >
         <img
-          class="nav-imgs"
           id="dvrpc-logo"
           src="<%- require('./img/navbar/logo.png')%>"
           alt="dvrpc logo"
         />
       </a>
 
-      <a  href="https://signup.e2ma.net/signup/1808352/1403728/" target="_blank" rel="noopener" tabindex="6">
+      <a  href="https://signup.e2ma.net/signup/1808352/1403728/" target="_blank" rel="noopener" >
         <img
           class="nav-imgs"
           src="<%- require('./img/navbar/email.png')%>"
@@ -217,7 +229,6 @@
         href="https://www.facebook.com/DVRPC"
         target="_blank"
         rel="noopener"
-        tabindex="7"
       >
         <img
           class="nav-imgs"
@@ -230,7 +241,6 @@
         href="https://twitter.com/DVRPC"
         target="_blank"
         rel="noopener"
-        tabindex="8"
       >
         <img
           class="nav-imgs"
@@ -243,7 +253,6 @@
         href="https://www.instagram.com/dvrpc/?hl=en"
         target="_blank"
         rel="noopener"
-        tabindex="9"
       >
         <img
           class="nav-imgs"
@@ -256,7 +265,6 @@
         href="https://www.linkedin.com/company/delaware-valley-regional-planning-commission"
         target="_blank"
         rel="noopener"
-        tabindex="10"
       >
         <img
           class="nav-imgs"
@@ -269,7 +277,6 @@
         href="https://www.youtube.com/channel/UCEU8UI5_iGkVypHP93b5jLA"
         target="_blank"
         rel="noopener"
-        tabindex="11"
       >
         <img
           class="nav-imgs"
@@ -278,6 +285,7 @@
         />
       </a>
     </footer>
+
     <div id="reference" style="display: none;"></div>
   </body>
 </html>

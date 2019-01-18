@@ -1,8 +1,7 @@
 var path = require('path'),
         HTMLWebpackPlugin = require('html-webpack-plugin'),
         ExtractTextPlugin = require('extract-text-webpack-plugin'),
-        webpack = require('webpack'),
-        polyfill = require('es6-promise').polyfill()
+        webpack = require('webpack')
 var extractPlugin = new ExtractTextPlugin({
     filename: './bundle.styles.css'
 })
@@ -10,7 +9,7 @@ var extractPlugin = new ExtractTextPlugin({
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
-    entry: `./js/index.js`, // main JS file for application
+    entry: ['core-js/fn/promise', `./js/index.js`], // main JS file for application
     output: {
         path: `${__dirname}/dist`, // defining output path for build files
         filename: 'js/[name].bundle.js' // defining naming convention for bundled dist file
@@ -62,10 +61,6 @@ module.exports = {
             template: 'index.html',
             hash: true
         }),
-        extractPlugin,
-        new webpack.ProvidePlugin({
-            "Promise": "imports-loader?this=>global!exports-loader?global.Promise!es6-promise",
-            "fetch": "imports-loader?this=>global!exports-loader?global.fetch!whatwg-fetch"
-        })
+        extractPlugin
     ]
 };

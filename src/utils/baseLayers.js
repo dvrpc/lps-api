@@ -86,7 +86,7 @@ export const baseLayers = {
               "#529442",
               "#323232"
             ],
-            "line-width": ["interpolate", ["linear"], ["zoom"], 8, 0.5, 12, 1],
+            "line-width": ["interpolate", ["linear"], ["zoom"], 8, 1.5, 12, 3],
             "line-opacity": .66
           }
         }
@@ -120,7 +120,7 @@ export const baseLayers = {
               "#529442",
               "#323232"
             ],
-            "line-width": ["interpolate", ["linear"], ["zoom"], 8, 2, 12, 3]
+            "line-width": ["interpolate", ["linear"], ["zoom"], 8, 4.5, 12, 9]
           },
           filter: ['match', ['get', 'LINE_NAME'], '', true, false]
         }
@@ -180,7 +180,7 @@ export const baseLayers = {
           source: 'railStations',
           type: 'circle',
           paint : {
-            'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1, 12, 5],
+            'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2, 12, 8],
             'circle-color': [
               'match',
               ['get', 'SURVEY_ID'],
@@ -192,7 +192,6 @@ export const baseLayers = {
             'circle-stroke-width': .5
           }
         },
-        placement: 'railLabels'
       },
       highlight: {
         layerDef : {
@@ -202,13 +201,12 @@ export const baseLayers = {
           filter: ['==', 'SURVEY_ID', ''],
           paint: {
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 12, 15],
-            'circle-stroke-color': '#155472',
-            'circle-stroke-width': 1.5,
-            'circle-color': 'green',
-            'circle-opacity': .5
+            'circle-stroke-color': '#ff0',
+            'circle-stroke-width': 2,
+            'circle-color': 'rgba(0,0,0,0)',
+            'circle-opacity': 1
           }
         },
-        placement: 'railLabels'
       },
       hover: {
         layerDef: {
@@ -229,7 +227,6 @@ export const baseLayers = {
             'circle-opacity': .9
           }
         },
-        placement: 'railLabels'
       }
     }
   }

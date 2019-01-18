@@ -38,109 +38,8 @@ nav{
 }
 #license-plate-logo{
     height:85%;
-}
-#more-info{
-    font-size: 1.5rem;
-    margin-left: 1%;
-    color: #155472;
-}
-#more-info:hover{
-    cursor: pointer;
-}
-#modal{
-    z-index: 10;
-    position: fixed;
-    display: none;
-    left: 0%;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0 auto;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.3);
-}
-#modal.visible{
-    display: flex
-}
-#modal-container{
     position: relative;
-    width: 50%;
-    max-height: 50%;
-    background: #f7f7f7;
-    padding: 2%;
-    margin: auto;
-    border-radius: 3px;
-    text-align: left;
-    box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
-    overflow-y: auto;
-    color: #6f6f6f
-}
-.modal-tabs{
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: space-around;
-    align-items: center;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-}
-.modal-tabs li{
-    color: #5ca3cb;
-    font-size: 1.25rem;
-    margin: 1%;
-}
-.modal-tabs li a{
-    text-decoration: none;
-}
-.modal-tabs li:hover{
-    cursor: pointer;
-}
-.modal-tabs li.active{
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: #155472
-}
-#modal-directions ol{
-    padding: 0 0 0 16px;
-}
-#modal-directions li{
-    padding-bottom: 1%;
-    width: 90%;
-    margin: auto;
-}
-#modal-directions h4{
-    text-align: center;
-    color: #5ca3cb
-}
-#close-modal {
-    position: absolute;
-    right: 2%;
-    top: 1%;
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-#close-modal:hover, #close-modal:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.modal-content{
-    display: none
-}
-.modal-content.visible{
-    display: block;
-}
-.modal-content p, .modal-content li {
-    font-size: .9rem;
-}
-#modal-contact{
-    text-align: center
-}
-#modal-contact h3, #modal-contact h4{
-    margin: .25%;
+    left: 2%;
 }
 .nav-column{
     display: flex;
@@ -150,49 +49,203 @@ nav{
     right: 2%;
     width: 50%;
 }
-form{
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    height: 100%;
-    font-weight: 700;
-    width: 100%;
-}
-select{
-    margin: 0 1%;
-    text-align: center;
-    color: #333;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-select:focus, input[type="submit"]:focus, .legend__toggle:focus, #more-info:focus  {
-    border: 4px solid red;
-}
-option:hover{
-    font-weight: 700;
-    background-color: #91BFDC
-}
+    /* Query Inputs */
+    form{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        height: 100%;
+        font-weight: 700;
+        width: 100%;
+    }
+    select{
+        margin: 0 1%;
+        text-align: center;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-input[type="submit"]{
-    color: #0078ae;
-    background: #fff;
-    border: none;
-    margin-left: 1%;
-    transition: color 0.25s, background 0.25s, border-color 0.25s;
-    transition-timing-function: linear;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    input[type="submit"]{
+        color: #0078ae;
+        background: #fff;
+        border: none;
+        margin-left: 1%;
+        transition: color 0.25s, background 0.25s, border-color 0.25s;
+        transition-timing-function: linear;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-}
-select, input[type="submit"]:hover{
-    cursor: pointer;
-}
-select, input[type="submit"]{
-    /*cool fancy trick I learned from Twitter on how to make fonts more responsive*/
-    font-size: .95rem;
-    padding: 5px 2%;
-    border-radius: 5px;
-    box-shadow: 2px 2px 1px 0px #bbb;
-    border: 1px solid #999;
-}
+    }
+    select, input[type="submit"]:hover{
+        cursor: pointer;
+    }
+    select, input[type="submit"]{
+        font-size: .95rem;
+        padding: 5px 2%;
+        border-radius: 5px;
+        box-shadow: 2px 2px 1px 0px #bbb;
+        border: 1px solid #999;
+    }
+    select[name="year"]{
+        flex-grow: 2
+    }
+
+    /* Modal */
+        /* Nav Icon */
+        #more-info{
+            font-size: 1.5rem;
+            margin-left: 5%;
+            color: #eee;
+            background: #155472;
+            width: 30px;
+            height: 30px;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+            font-weight: 700;
+            border-radius: 50%;
+        }
+        #more-info:hover{
+            cursor: pointer;
+        }
+        #close-modal {
+            position: absolute;
+            right: 2%;
+            top: 1%;
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* Modal Content*/
+        #modal{
+            z-index: 10;
+            position: fixed;
+            display: none;
+            left: 0%;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        #modal.visible{
+            display: flex
+        }
+        #modal-container{
+            position: relative;
+            width: 50%;
+            max-height: 50%;
+            background: #f7f7f7;
+            padding: 2%;
+            margin: auto;
+            border-radius: 3px;
+            text-align: left;
+            box-shadow: 1px 2px 5px rgba(0, 0, 0, 0.7);
+            overflow-y: auto;
+            color: #6f6f6f
+        }
+        .modal-content{
+            display: none
+        }
+        .modal-content.visible{
+            display: block;
+        }
+        .modal-content p, .modal-content li {
+            font-size: .9rem;
+        }
+
+        /* Modal Navigation*/
+        .modal-tabs{
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: space-around;
+            align-items: center;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .modal-tabs li{
+            color: #5ca3cb;
+            font-size: 1.25rem;
+            margin: 1%;
+        }
+        .modal-tabs li a{
+            text-decoration: none;
+        }
+        .modal-tabs li.active{
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #155472
+        }
+
+        /* Directions */
+        #modal-directions{
+            padding: 0 5%;
+        }
+        #modal-directions ol{
+            padding: 0;
+        }
+        #modal-directions li{
+            padding-bottom: 1%;
+            width: 90%;
+            margin: auto;
+        }
+        #modal-directions h4, #modal-legend h4{
+            text-align: center;
+            color: #5ca3cb;
+            margin: 1% 0;
+        }
+
+        /* Contact */
+        #modal-contact{
+            text-align: center
+        }
+        #modal-contact h3, #modal-contact h4{
+            margin: .25%;
+        }
+
+        /* Legend */
+        #modal-legend h3{
+            text-align: center;
+            color: #155472;
+        }
+        #modal-legend p{
+            margin: 1%
+        }
+        .modal-legend-station{
+            display: flex;
+            justify-content: space-around;
+            width: 50%;
+            margin: auto;
+            text-align: center;
+        }
+        .modal-legend-station div{
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+        }
+        #surveyed{
+            background: green;
+        }
+        #not-surveyed{
+            background: #aaa;
+        }
+
+        #modal-legend-rail{
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        #modal-legend-rail div{
+            border-bottom: .5rem solid;
+            width: 20%;
+            margin: 1%;
+            text-align: center;
+            padding-bottom: 1%;
+        }
 
 
 /*Map*/
@@ -200,6 +253,15 @@ main{
     height: 85%;
     position: relative;
     overflow-y: hidden;
+}
+.mapboxgl-ctrl-dvrpc{
+    display: flex!important;
+    justify-content: center;
+    align-items: center;
+}
+.mapboxgl-ctrl-dvrpc img{
+    width: 80%;
+    height: 80%;
 }
     /* Legend */
     .legend__container{
@@ -223,10 +285,14 @@ main{
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         order: 1;
         margin: auto;
-}
-
-    .legend__toggle.visible{
-        display: block;
+    }
+    .legend__toggle:after{
+        content: '\002B';
+        position: absolute;
+        right: 10%;
+    }
+    .legend__toggle.active:after{
+        content: '\2212'
     }
 
     .legend__body{
@@ -340,15 +406,15 @@ main{
     }
 
 
-/*Footer*/
+/* Footer */
 #nav-social-media{
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     padding: 10px 0;
 }
 .nav-imgs{
-    width: 45%;
+    width: 33%;
 }
 #dvrpc-logo{
     display: block;
@@ -356,20 +422,32 @@ main{
     padding-right: 2.5vw;
     border-right: 2px solid #eee;
     margin-right: 10%;
+    width: 45%;
 }
 footer{
     border-top: 2px solid #eee;
     background: #155472;
 }
 
-/*Transitions*/
+/* Actions */
 input[type="submit"]:hover{
     color: #fff;
     background-color: #57A773;
 }
+.legend__toggle:hover{
+    cursor: pointer;
+}
+#close-modal:hover, #close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+.modal-tabs li:hover{
+    cursor: pointer;
+}
 
 
-/* @TODO: Media Queries*/
+/* Media Queries*/
 @media all and (max-width: 950px) {
     #more-info{
         left: 11%;
@@ -393,6 +471,9 @@ input[type="submit"]:hover{
     }
     form>p{
         display: none;
+    }
+    #modal-container{
+        width: 80%;
     }
     .modal-tabs{
         flex-flow: column;

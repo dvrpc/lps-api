@@ -1,13 +1,10 @@
 import { ckmeans } from "../../node_modules/simple-statistics";
 import "../css/index.css";
 import {
-  getRailLayer,
   loadLayers
 } from "../utils/get-passenger-rail-layers.js";
-import Logo from "../img/DVRPCLogo.png";
-import Loading from "../img/cat.gif";
 import { baseLayers } from "../utils/baseLayers.js";
-import { fetch } from "whatwg-fetch";
+import { CreateDvrpcNavControl } from "../utils/defaultExtentControl";
 mapboxgl.accessToken =
   "pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA";
 // color schemes for each operator
@@ -34,22 +31,13 @@ const schemes = {
   }
 };
 
-const logoContainer = document.querySelector("#dvrpc-logo");
-let logo = new Image();
-logo.src = Logo;
-logoContainer.appendChild(logo);
-
-const loadingContainer = document.querySelector("#cat-loading");
-let loading = new Image();
-loading.src = Loading;
-loadingContainer.appendChild(loading);
 const baseExtent = {
   center: [-75.142241, 40.0518322],
   zoom: 8.5
 };
 const map = new mapboxgl.Map({
   container: "map",
-  style: "mapbox://styles/beattyre1/cjhw5mutc17922sl7me19mwc8",
+  style: "mapbox://styles/mapbox/light-v9",
   attributionControl: true,
   center: baseExtent.center,
   zoom: baseExtent.zoom // or whatever zoom you want
@@ -63,6 +51,8 @@ const ref = new mapboxgl.Map({
 });
 
 map.on("load", e => {
+  CreateDvrpcNavControl(baseExtent, map)
+
   fetch(
     "https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/1/query?where=1%3D1&outFields=FID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson"
   ).then(response => {
@@ -360,7 +350,7 @@ const PerformQuery = (stationID, year) => {
           default: "#ccc",
           stops: GenerateFillFunction(infoArray, colorScheme)
         },
-        "fill-outline-color": "#888",
+        "fill-outline-color": "#333",
         "fill-opacity": 0.7
       }
     };
@@ -388,6 +378,7 @@ const PerformQuery = (stationID, year) => {
     : null;
 
   if (stationID != "default") {
+    let popupReference = new Object();
     fetch(
       `https://a.michaelruane.com/api/lps/query?station=${stationID}&year=${year}`
     )
@@ -400,7 +391,6 @@ const PerformQuery = (stationID, year) => {
         UpdateRailFilter(stationInfo);
         // create filter array for hex tile
         let hex_values = [];
-        let popupReference = new Object();
         jawn.cargo.map(hex => {
           hex_values.push(hex.hex_id);
           popupReference[hex.hex_id] = hex.count;
@@ -426,6 +416,7 @@ const PerformQuery = (stationID, year) => {
           );
           map.on("click", e => {
             if (map.getLayer("hexClick")) map.removeLayer("hexClick");
+
           });
 
           map.on("click", "hexBins", e => {
@@ -479,8 +470,8 @@ const PerformQuery = (stationID, year) => {
                   false
                 ],
                 paint: {
-                  "line-color": "#f00",
-                  "line-width": 2
+                  "line-color": "#0ff",
+                  "line-width": 4
                 }
               });
             }
@@ -545,7 +536,7 @@ const StationPopup = event => {
     const SurveyInfo = data => {
       let container = document.createElement("ul");
       container.classList.add("map__stationPopup-text");
-      container.innerText = "Years Surveyed";
+      container.innerText = data.years.length > 1 ? "Years Surveyed"  : "Year Surveyed";
       data.years.sort((a, b) => b - a);
       data.years.map(year => {
         let list = document.createElement("li");
@@ -638,6 +629,23 @@ const StationPopup = event => {
   return popup;
 };
 
+const CreateYearOptions = (form, selection) =>{
+  // remove any artifacts
+  while (form.firstChild) {
+    form.removeChild(form.firstChild);
+  }
+  // grab station data
+  let station = data[selection]
+  // add options in order of most recent to oldest
+  station.years.sort((a, b)=> b - a)
+  station.years.map(year=>{
+    let option = document.createElement('option')
+    option.value = year
+    option.label = year
+    form.appendChild(option)
+  })
+}
+
 // function to get station sheds hexagons on submit
 const form = document.querySelector("#main-form");
 form.onsubmit = e => {
@@ -657,24 +665,11 @@ fetch("https://a.michaelruane.com/api/lps/test")
   .then(jawn => {
     // listener to populate year dropdown with valid values based on db on station change
     form[0].addEventListener("change", e => {
-      // remove any artifacts
-      while (form[1].firstChild) {
-        form[1].removeChild(form[1].firstChild);
-      }
-      // grab station data
-      let station = data[e.target.value];
-      // loop through response, grab the years that are associated with the new station value and create an appropriate amount of dropdown options
-      station.years.sort((a, b) => b - a);
-      station.years.forEach(year => {
-        let option = document.createElement("option");
-        option.value = year;
-        option.innerText = year;
-        form[1].appendChild(option);
-      });
+      CreateYearOptions(form[1], e.target.value)
       map.setFilter("railStations-highlight", [
         "==",
         ["get", "SURVEY_ID"],
-        station.id
+        ['to-number', e.target.value]
       ]);
     });
 
@@ -684,10 +679,10 @@ fetch("https://a.michaelruane.com/api/lps/test")
         let option = document.createElement("option");
         option.value = station.id;
         if (station.line == "Speedline")
-          option.innerHTML = `${station.name} (PATCO)`;
+          option.label = `${station.name} (PATCO)`;
         else if (station.line != "None")
-          option.innerHTML = `${station.name} (${station.line})`;
-        else option.innerHTML = `${station.name} (Park and Ride)`;
+          option.label = `${station.name} (${station.line})`;
+        else option.label = `${station.name} (Park and Ride)`;
         form[0].appendChild(option);
         data[station.id] = station;
       }
@@ -713,8 +708,7 @@ map.on("click", "railStations-base", e => {
     // populate form
     let form = document.querySelector("#main-form");
     form[0].value = station;
-    form[1].value = year;
-    form[1].innerHTML = `<option>${year}</option>`;
+    CreateYearOptions(form[1], station)
   }
 });
 map.on("mouseover", "railStations-base", e => {
@@ -732,6 +726,20 @@ map.on("mouseleave", "railStations-base", e => {
   map.setFilter("railStations-hover", ["==", "OBJECTID", ""]);
   stationPopup.remove();
 });
+
+let modalLegend = document.querySelector('#modal-legend-rail'),
+  lines = baseLayers.passengerRail.layers.base.layerDef.paint["line-color"]
+
+lines.map((value, index)=>{
+  let title = document.createElement('h4')
+  title.innerText = 'Passenger Rail Lines'
+  if ((index>1 && index<20) && index%2 == 0){
+    let box = document.createElement('div')
+    box.innerText = value
+    box.style.borderBottomColor = `${lines[index+1]}`
+    modalLegend.appendChild(box)
+  }
+})
 
 let toggle = document.querySelector(".legend__toggle");
 
@@ -751,7 +759,7 @@ const AriaHide = element => {
 const AriaShow = element => {
   element.classList.add("visible");
   element.setAttribute("aria-hidden", "false");
-};
+}; 
 
 const ModalLinkNav = e =>{
   for (let link of modalTabs){
@@ -776,6 +784,7 @@ moreInfo.onclick = () =>
 toggle.onclick = () => {
   let body = toggle.nextElementSibling;
   body.classList.contains("visible") ? AriaHide(body) : AriaShow(body);
+  toggle.classList.toggle('active')
 };
 // close the modal by clicking the 'x' or anywhere outside of it
 close.onclick = () => AriaHide(modal);
