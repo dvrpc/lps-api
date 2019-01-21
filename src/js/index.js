@@ -5,6 +5,9 @@ import {
 } from "../utils/get-passenger-rail-layers.js";
 import { baseLayers } from "../utils/baseLayers.js";
 import { CreateDvrpcNavControl } from "../utils/defaultExtentControl";
+import {polyfill} from "es6-promise"
+import "isomorphic-fetch"
+
 mapboxgl.accessToken =
   "pk.eyJ1IjoiYmVhdHR5cmUxIiwiYSI6ImNqOGFpY3o0cTAzcXoycXE4ZTg3d3g5ZGUifQ.VHOvVoTgZ5cRko0NanhtwA";
 // color schemes for each operator

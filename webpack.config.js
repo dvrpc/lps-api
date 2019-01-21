@@ -8,7 +8,7 @@ var extractPlugin = new ExtractTextPlugin({
 
 module.exports = {
     context: path.resolve(__dirname, 'src'),
-    entry: ['core-js/fn/promise', `./js/index.js`], // main JS file for application,
+    entry: ['@babel/polyfill', `./js/index.js`], // main JS file for application,
     mode: "development",
     output: {
         path: `${__dirname}/dist`, // defining output path for build files
