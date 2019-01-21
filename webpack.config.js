@@ -9,7 +9,7 @@ var extractPlugin = new ExtractTextPlugin({
 module.exports = {
     context: path.resolve(__dirname, 'src'),
     entry: ['@babel/polyfill', `./js/index.js`], // main JS file for application,
-    mode: "development",
+    mode: "production",
     output: {
         path: `${__dirname}/dist`, // defining output path for build files
         filename: 'js/[name].bundle.js' // defining naming convention for bundled dist file
@@ -22,7 +22,9 @@ module.exports = {
                 loader: 'babel-loader',
                 exclude: /node_modules/,
                 options: {
-                    presets: ["@babel/preset-env"] // convert everything to ES2015
+                    presets: [["@babel/preset-env", {
+                        "useBuiltIns" : 'entry'
+                    }]] // convert everything to ES2015
                 } 
             },
             // want to bundle your CSS files? i got u fam

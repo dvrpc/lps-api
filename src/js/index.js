@@ -5,7 +5,6 @@ import {
 } from "../utils/get-passenger-rail-layers.js";
 import { baseLayers } from "../utils/baseLayers.js";
 import { CreateDvrpcNavControl } from "../utils/defaultExtentControl";
-import {polyfill} from "es6-promise"
 import "isomorphic-fetch"
 
 mapboxgl.accessToken =
@@ -193,7 +192,7 @@ const PerformQuery = (stationID, year) => {
         range.filter(GetUniqueCount).length > 4
           ? ckmeans(range, 4)
           : ckmeans(range, range.filter(GetUniqueCount).length); //ckmeans, simple-statistics library
-      temp.forEach(cluster => {
+      temp.map(cluster => {
         let temp = {
           break: [cluster[0], cluster[cluster.length - 1]],
           count: cluster.length,
@@ -261,7 +260,7 @@ const PerformQuery = (stationID, year) => {
             line.mode
           })</span>`;
           list.setAttribute("style", `font-weight: 700; color: ${color}`);
-          legendLines.append(list);
+          legendLines.appendChild(list);
         });
       }
       content.name == "Wissinoming" || content.name == "Lamokin Street"
@@ -271,13 +270,11 @@ const PerformQuery = (stationID, year) => {
         : null;
       // set colors appropriately based on operator/mode scheme system
       const emphasis = document.querySelectorAll(".legend__emphasis");
-      emphasis.forEach(node => {
-        node.style.color = colorScheme[content.operator][content.mode][2];
-      });
+      for (let node of emphasis){ node.style.color = colorScheme[content.operator][content.mode][2] }
 
       // create legend boxes
       let i = 0;
-      colorScheme[content.operator][content.mode].forEach(classification => {
+      colorScheme[content.operator][content.mode].map(classification => {
         if (content.breaks[i]) {
           const container = document.querySelector(
               ".legend__distribution-summary"
@@ -314,8 +311,8 @@ const PerformQuery = (stationID, year) => {
         query: `GRID_ID%20IN%20(`,
         stops: []
       };
-      Object.keys(infoArray.breaks).forEach(key => {
-        infoArray.breaks[key].features.forEach(feature => {
+      Object.keys(infoArray.breaks).map(key => {
+        infoArray.breaks[key].features.map(feature => {
           info.stops.push([
             feature,
             colorScheme[infoArray.operator][infoArray.mode][key]
@@ -323,7 +320,7 @@ const PerformQuery = (stationID, year) => {
         });
       });
       let i = 1;
-      infoArray.data.forEach(feature => {
+      infoArray.data.map(feature => {
         i != infoArray.data.length
           ? (info.query = `${info.query} '${feature.id}',`)
           : (info.query = `${info.query} '${feature.id}')`);
@@ -486,6 +483,7 @@ const PerformQuery = (stationID, year) => {
         !legend.classList.contains("visible")
           ? legend.classList.add("visible")
           : null;
+        !legend.previousElementSibling.classList.contains('active') ? legend.previousElementSibling.classList.add('active') : null
 
         // move map extent to station
         let extent = map.querySourceFeatures("railStations", {
@@ -677,7 +675,7 @@ fetch("https://a.michaelruane.com/api/lps/test")
     });
 
     // loop through stations and create a dropdown option for each one
-    jawn.cargo.forEach(station => {
+    jawn.cargo.map(station => {
       if (!data[station.id]) {
         let option = document.createElement("option");
         option.value = station.id;
@@ -786,7 +784,7 @@ moreInfo.onclick = () =>
   (modal.style.display = "none" ? AriaShow(modal) : AriaHide(modal));
 toggle.onclick = () => {
   let body = toggle.nextElementSibling;
-  body.classList.contains("visible") ? AriaHide(body) : AriaShow(body);
+  body.classList.contains("visible") ? AriaHide(body): AriaShow(body)
   toggle.classList.toggle('active')
 };
 // close the modal by clicking the 'x' or anywhere outside of it
