@@ -56,7 +56,7 @@ map.on("load", e => {
   CreateDvrpcNavControl(baseExtent, map)
 
   fetch(
-    "https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/1/query?where=1%3D1&outFields=FID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=pgeojson"
+    "https://services1.arcgis.com/LWtWv6q6BJyKidj8/arcgis/rest/services/DVRPC_LPS/FeatureServer/1/query?where=1%3D1&outFields=OBJECTID%2C+GRID_ID&outSR=4326&geometryPrecision=4&f=geojson"
   ).then(response => {
     if (response.ok) {
       response
@@ -331,7 +331,7 @@ const PerformQuery = (stationID, year) => {
     const GenerateFilterFunction = values => {
       let filter = ["any"];
       values.map(v => {
-        filter.push(["==", ["get", "FID"], v]);
+        filter.push(["==", ["get", "OBJECTID"], v]);
       });
       return filter;
     };
@@ -345,7 +345,7 @@ const PerformQuery = (stationID, year) => {
       filter: GenerateFilterFunction(filter),
       paint: {
         "fill-color": {
-          property: "FID",
+          property: "OBJECTID",
           type: "categorical",
           default: "#ccc",
           stops: GenerateFillFunction(infoArray, colorScheme)
@@ -420,8 +420,8 @@ const PerformQuery = (stationID, year) => {
           });
 
           map.on("click", "hexBins", e => {
-            if (popupReference[e.features[0].properties.FID]) {
-              let count = popupReference[e.features[0].properties.FID];
+            if (popupReference[e.features[0].properties.OBJECTID]) {
+              let count = popupReference[e.features[0].properties.OBJECTID];
               let offsets = {
                 top: [0, 0],
                 "top-left": [0, 0],
@@ -501,7 +501,7 @@ const PerformQuery = (stationID, year) => {
   }
 };
 const StationPopup = event => {
-  const SurveyedPopup = (props, colors, event) => {
+  const SurveyedPopup = (props, event) => {
     const Name = data => {
       let title = document.createElement("h2");
       title.classList.add("map__stationPopup-stationInfo");
@@ -514,7 +514,7 @@ const StationPopup = event => {
       let line = document.createElement("p"),
         colorScheme =
           props.OPERATOR == "PATCO"
-            ? schemes.DRPA["Rapid Transit"]
+            ? colors
             : schemes[props.OPERATOR][props.TYPE];
       line.classList.add("map__stationPopup-lineInfo");
       line.style.color = colorScheme[colorScheme.length - 2];
@@ -547,11 +547,10 @@ const StationPopup = event => {
 
       return container;
     };
-
-    let stationData = data[props.SURVEY_ID],
+    let colors = props.operator != 'PATCO' ? schemes[props.operator][props.mode] : schemes.DRPA["Rapid Transit"],
       content = document.createElement("div"),
-      title = Name(stationData),
-      survey = SurveyInfo(stationData);
+      title = Name(props),
+      survey = SurveyInfo(props);
 
     content.appendChild(title);
     event.features.map(station => {
@@ -604,8 +603,7 @@ const StationPopup = event => {
   let content;
   if (data[event.features[0].properties.SURVEY_ID]) {
     let stationData = data[event.features[0].properties.SURVEY_ID];
-    let colorScheme = schemes[stationData.operator][stationData.mode];
-    content = SurveyedPopup(event.features[0].properties, colorScheme, event);
+    content = SurveyedPopup(stationData, event);
   } else {
     let props = event.features[0].properties;
     content = NotSurveyedPopup(props, event);
