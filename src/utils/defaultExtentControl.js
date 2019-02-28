@@ -1,3 +1,5 @@
+const bug = require('../img/dvrpc_bug.png')
+
 export const CreateDvrpcNavControl = (defaultExtent, map) =>{
   let navigationControl = new mapboxgl.NavigationControl()
   // button
@@ -14,8 +16,8 @@ export const CreateDvrpcNavControl = (defaultExtent, map) =>{
   })
 
   // image 
-  let icon = document.createElement('img')
-  icon.src = '../img/dvrpc-bug.png'
+  let icon = new Image()
+  icon.src = bug
   icon.alt = 'DVRPC Alternative Logo'
   button.appendChild(icon)
 

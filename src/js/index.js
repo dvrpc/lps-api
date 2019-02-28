@@ -226,7 +226,7 @@ const PerformQuery = (stationID, year) => {
                 <p class="legend__emphasis summary">${range.reduce(
                   (a, b) => a + b
                 )}</p>
-                <p class="legend__text">Total Commuters</p>
+                <p class="legend__text">Total Commuter Vehicles</p>
             </div>
         </div>
         <div class="legend__distribution-summary"></div>
@@ -246,7 +246,7 @@ const PerformQuery = (stationID, year) => {
                               <p class="legend__emphasis summary">${range.reduce(
                                 (a, b) => a + b
                               )}</p>
-                              <p class="legend__text">Total Commuters</p>
+                              <p class="legend__text">Total Commuter Vehicles</p>
                           </div>
                       </div>
                       <div class="legend__distribution-summary"></div>
