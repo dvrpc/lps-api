@@ -22,7 +22,10 @@ body{
 nav, footer, main{
     width: 100%;
 }
-
+abbr{
+    text-decoration: none;
+    pointer-events: none;
+}
 
 /*Navbar*/
 nav{
@@ -37,9 +40,10 @@ nav{
     height: 10%;
 }
 #license-plate-logo{
-    height:85%;
+    height: auto;
     position: relative;
     left: 2%;
+    max-width: 20%;
 }
 .nav-column{
     display: flex;

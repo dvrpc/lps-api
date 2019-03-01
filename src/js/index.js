@@ -762,7 +762,8 @@ const AriaShow = element => {
 
 const ModalLinkNav = e =>{
   for (let link of modalTabs){
-    let target = document.querySelector(`#modal-${link.textContent.toLowerCase()}`)
+    let concat = link.textContent.split(' ').map(word => word.toLowerCase()).join('-')
+    let target = document.querySelector(`#modal-${concat}`)
     if (link == e.target){
       link.classList.add('active')
       AriaShow(target)
