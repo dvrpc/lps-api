@@ -641,6 +641,7 @@ const CreateYearOptions = (form, selection) =>{
     let option = document.createElement('option')
     option.value = year
     option.label = year
+    option.innerText = option.label
     form.appendChild(option)
   })
 }
@@ -682,6 +683,7 @@ fetch("https://a.michaelruane.com/api/lps/test")
         else if (station.line != "None")
           option.label = `${station.name} (${station.line})`;
         else option.label = `${station.name} (Park and Ride)`;
+        option.innerText = option.label
         form[0].appendChild(option);
         data[station.id] = station;
       }
