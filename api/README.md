@@ -9,7 +9,7 @@ The backend of this project is running on a PostGIS enabled PostgreSQL 9.5 datab
 - Django v1.11.14
 - Psycopg2 v2.7.5
 
-#### **Root URL:** `https://a.michaelruane.com/api/lps/query?<query parameters>`
+#### **Root URL:** `https://alpha.dvrpc.org/api/lps/query?<query parameters>`
 
 Parameters:
 - `station=<Station Name>`

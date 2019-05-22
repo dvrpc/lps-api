@@ -26,7 +26,7 @@ SECRET_KEY = c.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['a.michaelruane.com']
+ALLOWED_HOSTS = ['alpha.dvrpc.org']
 
 
 # Application definition

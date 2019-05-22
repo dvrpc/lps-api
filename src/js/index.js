@@ -380,7 +380,7 @@ const PerformQuery = (stationID, year) => {
   if (stationID != "default") {
     let popupReference = new Object();
     fetch(
-      `https://a.michaelruane.com/api/lps/query?station=${stationID}&year=${year}`
+      `https://alpha.dvrpc.org/api/lps/query?station=${stationID}&year=${year}`
     )
       .then(response => {
         if (response.status == 200) {
@@ -656,7 +656,7 @@ form.onsubmit = e => {
 };
 let data = new Object();
 // populate dropdowns with possible query values
-fetch("https://a.michaelruane.com/api/lps/test")
+fetch("https://alpha.dvrpc.org/api/lps/test")
   .then(response =>
     response.ok
       ? response.json()
