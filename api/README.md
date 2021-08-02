@@ -1,16 +1,9 @@
-# DVRPC License Plate Survey (LPS) Guide
----
+# License Plate Survey (LPS) API
 
-### **Overview**
-The backend of this project is running on a PostGIS enabled PostgreSQL 9.5 database using a Python Django REST Framework API 
+Base URL: https://alpha.dvrpc.org/api/lps/
 
-> Python Dependencies
-- Python 2.7
-- Django v1.11.14
-- Psycopg2 v2.7.5
+Query parameters:
+  - `station=<Station Number>`
+  - `year=<Survey Year>`
 
-#### **Root URL:** `https://alpha.dvrpc.org/api/lps/query?<query parameters>`
-
-Parameters:
-- `station=<Station Name>`
-- `year=<Survey Year>`
+E.g. https://alpha.dvrpc.org/api/lps/query?station=96&year=2013
