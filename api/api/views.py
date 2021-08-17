@@ -1,7 +1,46 @@
 from django.http import HttpResponse, JsonResponse
-from lib import secret as c
+import config as c
 import psycopg2 as psql
 import re
+
+STATION_YEAR_QUERY = """
+    WITH a AS (
+        SELECT points.survey_id as id,
+            points.count as count,
+            points.surveyyear as year,
+            points.geom
+        FROM points
+        JOIN stations ON points.survey_id = stations.survey_id
+    )
+
+    SELECT hexbins.gid as hex_id,
+        SUM(a.count) as count
+    FROM a, hexbins
+    WHERE
+        (a.id = '{}' and a.year = '{}')
+        AND
+        ST_Within(a.geom, hexbins.geom)
+    GROUP BY
+        hexbins.gid,
+        hexbins.geom,
+        a.id
+    ORDER BY id
+    ;
+"""
+
+OPTIONS_Q = """
+    SELECT stations.survey_id as id,
+        stations.name as name,
+        stations.type as type,
+        stations.line as line,
+        stations.operator as operator,
+        points.surveyyear as year
+    FROM stations
+    JOIN points ON stations.survey_id = points.survey_id
+    GROUP BY id, name, type, stations.line, stations.operator, year
+    ORDER BY name;
+"""
+
 
 def index(request):
     return HttpResponse('this is the index page')
