@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os;
+import os
 from lib import secret as c
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -26,7 +26,7 @@ SECRET_KEY = c.SECRET_KEY
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['alpha.dvrpc.org']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -80,9 +80,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': c.DB_NAME,
         'USER' : c.DB_USER,
-	'PASSWORD': c.DB_PASS,
-	'HOST': 'localhost',
-	'PORT': ''
+        'PASSWORD' : c.DB_PASS,
+        'HOST' : c.DB_HOST,
+       'PORT' : c.DB_PORT
     }
 }
 
