@@ -1,6 +1,5 @@
 # License Plate Survey (LPS) API
 
-Base URL: https://alpha.dvrpc.org/api/lps/
+Base URL: https://cloud.dvrpc.org/api/lps/
 
-Documentation: http://alpha.dvrpc.org/api/lps/v1/docs
-
+Documentation: http://cloud.dvrpc.org/api/lps/v1/docs
