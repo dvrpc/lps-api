@@ -74,7 +74,7 @@ def db(conn_string):
     response_model=List[HexbinResponse],
     responses=responses,
 )
-def hexbins(station: str, year: str):
+def hexbins(station: int, year: int):
     """Get hexbins, and count of commuters, from which commuters traveled to a station/year."""
     with db(PG_CREDS) as cur:
         cur.execute(
@@ -92,7 +92,7 @@ def hexbins(station: str, year: str):
                 SUM(a.count) as count
             FROM a, hexbins
             WHERE
-                (a.id = %s and a.year = %s)
+                (a.id = '%s' and a.year = '%s')
                 AND
                 ST_Within(a.geom, hexbins.geom)
             GROUP BY
@@ -106,7 +106,10 @@ def hexbins(station: str, year: str):
         result = cur.fetchall()
 
     if not result:
-        return JSONResponse(status_code=404, content={"message": "Query returned no results"})
+        return JSONResponse(
+            status_code=404,
+            content={"message": "No matching results for provided station and year"},
+        )
 
     hexbins = []
     for row in result:
