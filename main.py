@@ -13,7 +13,7 @@ from config import PG_CREDS
 
 class HexbinResponse(BaseModel):
     count: int
-    hex_id: str
+    hex_id: int
 
 
 class StationResponse(BaseModel):
