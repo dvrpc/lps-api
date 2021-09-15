@@ -17,7 +17,7 @@ class HexbinResponse(BaseModel):
 
 
 class StationResponse(BaseModel):
-    id: str
+    id: int
     name: str
     mode: Optional[str]
     line: str
