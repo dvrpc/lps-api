@@ -152,7 +152,7 @@ def stations():
         year_per_station = cur.fetchall()
 
     if not result:
-        return JSONResponse(status_code=404, content={"message": "Query returned no results"})
+        return []
 
     stations = []
     for row in result:
