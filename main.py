@@ -62,6 +62,7 @@ app.add_middleware(
 @contextmanager
 def db(conn_string):
     conn = psycopg2.connect(conn_string)
+    conn.autocommit = True
     try:
         with conn.cursor() as cur:
             yield cur
