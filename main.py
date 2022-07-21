@@ -1,11 +1,10 @@
-from contextlib import contextmanager
 from typing import List, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
-import psycopg2
+import psycopg
 from pydantic import BaseModel
 
 from config import PG_CREDS
@@ -59,17 +58,6 @@ app.add_middleware(
 )
 
 
-@contextmanager
-def db(conn_string):
-    conn = psycopg2.connect(conn_string)
-    conn.autocommit = True
-    try:
-        with conn.cursor() as cur:
-            yield cur
-    finally:
-        conn.close()
-
-
 @app.get(
     "/api/lps/v1/hexbins",
     response_model=List[HexbinResponse],
@@ -77,8 +65,8 @@ def db(conn_string):
 )
 def hexbins(station: int, year: int):
     """Get hexbins, and count of commuters, from which commuters traveled to a station/year."""
-    with db(PG_CREDS) as cur:
-        cur.execute(
+    with psycopg.connect(PG_CREDS) as conn:
+        result = conn.execute(
             """
             WITH a AS (
                 SELECT points.survey_id as id,
@@ -93,7 +81,7 @@ def hexbins(station: int, year: int):
                 SUM(a.count) as count
             FROM a, hexbins
             WHERE
-                (a.id = '%s' and a.year = '%s')
+                (a.id = %s and a.year = %s)
                 AND
                 ST_Within(a.geom, hexbins.geom)
             GROUP BY
@@ -103,8 +91,7 @@ def hexbins(station: int, year: int):
             ORDER BY id
         """,
             (station, year),
-        )
-        result = cur.fetchall()
+        ).fetchall()
 
     if not result:
         return JSONResponse(
@@ -125,8 +112,8 @@ def hexbins(station: int, year: int):
 )
 def stations():
     """Get station information, including years surveyed."""
-    with db(PG_CREDS) as cur:
-        cur.execute(
+    with psycopg.connect(PG_CREDS) as conn:
+        result = conn.execute(
             """
             SELECT
                 stations.survey_id as id,
@@ -140,17 +127,15 @@ def stations():
             GROUP BY id, name, type, stations.line, stations.operator, year
             ORDER BY name
             """
-        )
-        result = cur.fetchall()
+        ).fetchall()
 
-        cur.execute(
+        year_per_station = conn.execute(
             """
                 SELECT DISTINCT survey_id, surveyyear
                 FROM points
                 ORDER BY survey_id, surveyyear
             """
-        )
-        year_per_station = cur.fetchall()
+        ).fetchall()
 
     if not result:
         return []

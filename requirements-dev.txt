@@ -1,6 +1,6 @@
 -r requirements-base.txt
-coverage
-requests
-pytest
-pytest-cov
+coverage==6.4.2
+requests==2.28.1
+pytest==7.1.2
+pytest-cov==3.0.0
 
