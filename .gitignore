@@ -3,3 +3,5 @@
 *.swo
 config.py
 ve/
+.coverage
+htmlcov/
