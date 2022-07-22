@@ -6,7 +6,7 @@ To add additional surveyed stations, a CSV file in the format "surveyyear,survey
 
 There's a test that verifies that the total count of the "points" table (data from the surveys), in tests/test_points.py. Update this to what it should be (create a new assert statement from the previous one, adding the new number of records). Once the import is done, run the tests (`python -m pytest tests`, from the root directory in an activated virtual environment) to ensure the import is successful.
 
-After a successful data import, backup the local database. From the postgres account, run `pg_dump -O -Fc licensplate > licenseplate_DATE_HERE.pgc`. Then use the cloud-ansible (https://github.com/dvrpc/cloud-ansible) project to restore it on the server.
+After a successful data import, backup the local database. From the postgres account, run `pg_dump -O -Fc licenseplate > licenseplate_DATE_HERE.pgc`. Then use the cloud-ansible (https://github.com/dvrpc/cloud-ansible) project to restore it on the server.
 
 Add the data update to the record below.
 
