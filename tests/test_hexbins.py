@@ -28,9 +28,20 @@ def test_200_when_parameter_converted_to_int_successfully(client, station, year)
 
 
 @pytest.mark.parametrize(
-    "station,year,count", [(96, 2013, 50), (96, 2019, 42), (1, 2017, 64), (189, 2019, 31)]
+    "station,year,count_hexbins,total_vehicles",
+    [(96, 2013, 50, 207), (96, 2019, 42, 86), (1, 2017, 64, 155), (189, 2019, 31, 101)],
 )
-def test_success_spot_check(client, station, year, count):
+def test_success_spot_check(client, station, year, count_hexbins, total_vehicles):
+    """Stations being checked:
+    96: Miquon
+    1: 46th Street
+    189: Wallingford
+    """
     response = client.get(endpoint + f"?station={station}&year={year}")
+    sum_vehicles = 0
+    for hexbin in response.json():
+        sum_vehicles += hexbin["count"]
+
     assert response.status_code == 200
-    assert len(response.json()) == count
+    assert len(response.json()) == count_hexbins
+    assert sum_vehicles == total_vehicles
