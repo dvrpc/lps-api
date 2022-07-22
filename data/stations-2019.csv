@@ -1,0 +1,190 @@
+name,survey_id,operator,line,type
+46th Street,1,SEPTA,Market/Frankford Line,Subway/Elevated
+60th Street,2,SEPTA,Market/Frankford Line,Subway/Elevated
+69th Street Transportation Center,3,SEPTA,Market/Frankford Line,Subway/Elevated
+80th St Eastwick Loop,4,SEPTA,Route 36,Surface Trolley
+9th Street,5,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Allen Lane,6,SEPTA,Chestnut Hill West Line,Commuter Rail
+Ambler,7,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Angora,8,SEPTA,Media/Elwyn Line,Commuter Rail
+Ardmore,9,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Ardmore Avenue,10,SEPTA,Norristown High Speed Line,Rapid Transit
+Ardmore Junction,11,SEPTA,Norristown High Speed Line,Rapid Transit
+Ardsley,12,SEPTA,Warminster Line,Commuter Rail
+NRG,13,SEPTA,Broad Street Line,Subway
+Atco,14,NJ Transit,NJ Transit Atlantic City Line,Commuter Rail
+Bala,15,SEPTA,Cynwyd Line,Commuter Rail
+Beechwood-Brookline,16,SEPTA,Norristown High Speed Line,Rapid Transit
+Berwyn,17,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Bethayres,18,SEPTA,West Trenton Line,Commuter Rail
+Bordentown,19,NJ Transit,River LINE,Light Rail
+Bridgeport,20,SEPTA,Norristown High Speed Line,Rapid Transit
+Bristol,21,SEPTA,Trenton Line,Commuter Rail
+Bryn Mawr,22,SEPTA,Norristown High Speed Line,Commuter Rail
+Bryn Mawr,23,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Burlington South,24,NJ Transit,River LINE,Light Rail
+Carpenter Lane,25,SEPTA,Chestnut Hill West Line,Commuter Rail
+Chalfont,26,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Chelten Avenue,27,SEPTA,Chestnut Hill West Line,Commuter Rail
+Cheltenham,28,SEPTA,Fox Chase Line,Commuter Rail
+Cherry Hill,29,NJ Transit,NJ Transit Atlantic City Line,Commuter Rail
+Chester Transportation Center,30,SEPTA,Wilmington/Newark Line,Commuter Rail
+Chestnut Hill East,31,SEPTA,Chestnut Hill East Line,Commuter Rail
+Chestnut Hill West,32,SEPTA,Chestnut Hill West Line,Commuter Rail
+Cinnaminson,33,NJ Transit,River LINE,Light Rail
+Clifton-Aldan,34,SEPTA,Media/Elwyn Line,Commuter Rail
+Colmar,35,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Conshohocken,36,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Cornwells Heights,37,SEPTA,Trenton Line,Commuter Rail
+Crestmont,38,SEPTA,Warminster Line,Commuter Rail
+Croydon,39,SEPTA,Trenton Line,Commuter Rail
+Cynwyd,40,SEPTA,Cynwyd Line,Commuter Rail
+Daylesford,41,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Dekalb Street,42,SEPTA,Norristown High Speed Line,Rapid Transit
+Delaware Valley College,43,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Devon,44,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Downingtown,45,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Doylestown,46,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Drexeline,47,SEPTA,Route 101 Trolley,Surface Trolley
+East Falls,48,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Eastwick,49,SEPTA,Airport Line,Commuter Rail
+Elkins Park,50,SEPTA,Glenside Combined,Commuter Rail
+Elm Street,51,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Elwyn,52,SEPTA,Media/Elwyn Line,Commuter Rail
+Exton,53,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Fern Rock,54,SEPTA,Glenside Combined,Commuter Rail
+Ferry Avenue,55,DRPA,PATCO,Rapid Transit
+Florence,56,NJ Transit,River LINE,Light Rail
+Forest Hills,57,SEPTA,West Trenton Line,Commuter Rail
+Fort Washington,58,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Fortuna,59,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Fox Chase,60,SEPTA,Fox Chase Line,Commuter Rail
+Frankford Transportation Center,61,SEPTA,Market/Frankford Line,Subway/Elevated
+Frazer Park and Ride,62,TMACC,None,Park and Ride
+Germantown,63,SEPTA,Chestnut Hill East Line,Commuter Rail
+Glenolden,64,SEPTA,Wilmington/Newark Line,Commuter Rail
+Glenside,65,SEPTA,Glenside Combined,Commuter Rail
+Gravers Lane,66,SEPTA,Chestnut Hill East Line,Commuter Rail
+Gulph Mills,67,SEPTA,Norristown High Speed Line,Rapid Transit
+Gwynedd Valley,68,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Hamilton,69,NJ Transit,Northeast Corridor Line,Commuter Rail
+Hatboro,70,SEPTA,Warminster Line,Commuter Rail
+Haverford,71,SEPTA,Norristown High Speed Line,Rapid Transit
+Haverford,72,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Highland,73,SEPTA,Chestnut Hill West Line,Commuter Rail
+Highland Avenue,74,SEPTA,Wilmington/Newark Line,Commuter Rail
+Holmesburg Junction,75,SEPTA,Trenton Line,Commuter Rail
+Hughes Park,76,SEPTA,Norristown High Speed Line,Rapid Transit
+Ivy Ridge,77,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Jenkintown-Wyncote,78,SEPTA,Glenside Combined,Commuter Rail
+Lamokin Street,79,SEPTA,Wilmington/Newark Line,Commuter Rail
+Langhorne,80,SEPTA,West Trenton Line,Commuter Rail
+Lansdale,81,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Lansdowne,82,SEPTA,Media/Elwyn Line,Commuter Rail
+Levittown,83,SEPTA,Trenton Line,Commuter Rail
+Lindenwold,84,DRPA,PATCO,Rapid Transit
+Link Belt,85,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Lionville Park and Ride,86,TMACC,None,Park and Ride
+Main Street,87,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Malvern,88,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Malvern Park and Ride,89,TMACC,None,Park and Ride
+Marcus Hook,90,SEPTA,Wilmington/Newark Line,Commuter Rail
+Matsonford,91,SEPTA,Norristown High Speed Line,Rapid Transit
+Meadowbrook,92,SEPTA,West Trenton Line,Commuter Rail
+Media,93,SEPTA,Media/Elwyn Line,Commuter Rail
+Melrose Park,94,SEPTA,Glenside Combined,Commuter Rail
+Merion,95,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Miquon,96,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Morton,97,SEPTA,Media/Elwyn Line,Commuter Rail
+Moylan-Rose Valley,98,SEPTA,Media/Elwyn Line,Commuter Rail
+Narberth,99,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Neshaminy Falls,100,SEPTA,West Trenton Line,Commuter Rail
+New Britain,101,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Noble,102,SEPTA,West Trenton Line,Commuter Rail
+Norristown Transportation Center,103,SEPTA,Norristown High Speed Line,Rapid Transit
+North Hills,104,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+North Wales,105,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Norwood,106,SEPTA,Wilmington/Newark Line,Commuter Rail
+Olney,107,SEPTA,Fox Chase Line,Commuter Rail
+Oreland,108,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Overbrook,109,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Paoli,110,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Parkesburg,111,Amtrak,Keystone Corridor,Intercity Passenger Rail
+Penfield,112,SEPTA,Norristown High Speed Line,Rapid Transit
+Penllyn,113,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Pennbrook,114,SEPTA,Lansdale/Doylestown Line,Commuter Rail
+Philmont,115,SEPTA,West Trenton Line,Commuter Rail
+Primos,116,SEPTA,Media/Elwyn Line,Commuter Rail
+Princeton Junction,117,NJ Transit,Northeast Corridor Line,Commuter Rail
+Prospect Park,118,SEPTA,Wilmington/Newark Line,Commuter Rail
+Queen Lane,119,SEPTA,Chestnut Hill West Line,Commuter Rail
+Radnor,120,SEPTA,Norristown High Speed Line,Rapid Transit
+Radnor,121,,Paoli/Thorndale Line,
+Roebling,122,NJ Transit,River LINE,Light Rail
+Rosemont,123,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Roslyn,124,SEPTA,Warminster Line,Commuter Rail
+Route 73/Pennsauken,125,NJ Transit,River LINE,Light Rail
+Rydal,126,SEPTA,West Trenton Line,Commuter Rail
+Ryers,127,SEPTA,Fox Chase Line,Commuter Rail
+Scenic Road,128,SEPTA,Route 101 Trolley,Surface Trolley
+Secane,129,SEPTA,Media/Elwyn Line,Commuter Rail
+Sedgwick,130,SEPTA,Chestnut Hill East Line,Commuter Rail
+Somerton,131,SEPTA,West Trenton Line,Commuter Rail
+Spring Mill,132,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Springfield Road,133,SEPTA,Route 101 Trolley,Surface Trolley
+St. Davids,134,SEPTA,Paoli/Thorndale Line,Commuter Rail
+St. Martins,135,SEPTA,Chestnut Hill West Line,Commuter Rail
+Stenton,136,SEPTA,Chestnut Hill East Line,Commuter Rail
+Strafford,137,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Swarthmore,138,SEPTA,Media/Elwyn Line,Commuter Rail
+Thorndale,139,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Torresdale,140,SEPTA,Trenton Line,Commuter Rail
+Township Line Road,141,SEPTA,Norristown High Speed Line,Rapid Transit
+Trenton,142,NJ Transit,Northeast Corridor Line,Commuter Rail
+Trevose,143,SEPTA,West Trenton Line,Commuter Rail
+Tulpehocken,144,SEPTA,Chestnut Hill West Line,Commuter Rail
+Upsal,145,SEPTA,Chestnut Hill West Line,Commuter Rail
+US 1 & PA 272 Park and Ride,146,TMACC,None,Park and Ride
+US 1 & PA 472 Park and Ride,147,TMACC,None,Park and Ride
+Villanova,148,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Villanova,149,SEPTA,Norristown High Speed Line,Rapid Transit
+Warminster,150,SEPTA,Warminster Line,Commuter Rail
+Washington Lane,151,SEPTA,Chestnut Hill East Line,Commuter Rail
+Wayne,152,SEPTA,Paoli/Thorndale Line,Commuter Rail
+West Goshen Park and Ride,153,TMACC,None,Park and Ride
+West Trenton,154,SEPTA,West Trenton Line,Commuter Rail
+Whitford,155,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Willow Grove,156,SEPTA,Warminster Line,Commuter Rail
+Wissahickon,157,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Wissinoming,158,SEPTA,Trenton Line,Commuter Rail
+Woodbourne,159,SEPTA,West Trenton Line,Commuter Rail
+Woodcrest,160,DRPA,PATCO,Rapid Transit
+Woodland Avenue (Springfield),161,SEPTA,Route 101 Trolley,Surface Trolley
+Wyndmoor,162,SEPTA,Chestnut Hill East Line,Commuter Rail
+Wynnefield Avenue,163,SEPTA,Cynwyd Line,Commuter Rail
+Wynnewood,164,SEPTA,Paoli/Thorndale Line,Commuter Rail
+Wynnewood Road,165,SEPTA,Norristown High Speed Line,Rapid Transit
+Yardley,166,SEPTA,West Trenton Line,Commuter Rail
+Bryn Mawr,167,SEPTA,Norristown High Speed Line,Rapid Transit
+Parkview,168,SEPTA,Norristown High Speed Line,Rapid Transit
+Providence Road,169,SEPTA,Route 101 Trolley,Surface Trolley
+Drexel Manor,170,SEPTA,Route 102 Trolley,Surface Trolley
+Tacony,171,SEPTA,Trenton Line,Commuter Rail
+Walter Rand Transportation Center,172,DRPA,PATCO,Rapid Transit
+Folcroft,173,SEPTA,Wilmington/Newark Line,Commuter Rail
+Gladstone,174,SEPTA,Media/Elwyn Line,Commuter Rail
+North Philadelphia,175,SEPTA,Trenton Line,Commuter Rail
+Pennsauken Transit Center,176,NJ Transit,River LINE,Light Rail
+Pine Ridge Road,177,SEPTA,Route 101 Trolley,Surface Trolley
+Ashland,178,DRPA,PATCO,Rapid Transit
+Beverly/Edgewater,179,NJ Transit,River LINE,Light Rail
+Collingswood,180,DRPA,PATCO,Rapid Transit
+Crum Lynne,181,SEPTA,Wilmington/Newark Line,Commuter Rail
+Curtis Park,182,SEPTA,Wilmington/Newark Line,Commuter Rail
+Darby,183,SEPTA,Wilmington/Newark Line,Commuter Rail
+Eddystone,184,SEPTA,Wilmington/Newark Line,Commuter Rail
+Haddonfield,185,DRPA,PATCO,Rapid Transit
+Manayunk,186,SEPTA,Manayunk/Norristown Line,Commuter Rail
+Mount Airy,187,SEPTA,Chestnut Hill East Line,Commuter Rail
+Sharon Hill,188,SEPTA,Wilmington/Newark Line,Commuter Rail
+Wallingford,189,SEPTA,Media/Elwyn Line,Commuter Rail
