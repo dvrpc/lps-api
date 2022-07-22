@@ -64,13 +64,15 @@ app.add_middleware(
     responses=responses,
 )
 def hexbins(station: int, year: int):
-    """Get hexbins, and count of commuters, from which commuters traveled to a station/year."""
+    """
+    Get hexbins, and count of commuter vehicles, from which commuters traveled to a station/year.
+    """
+
     with psycopg.connect(PG_CREDS) as conn:
         result = conn.execute(
             """
             WITH a AS (
                 SELECT points.survey_id as id,
-                    points.count as count,
                     points.surveyyear as year,
                     points.geom
                 FROM points
@@ -78,7 +80,7 @@ def hexbins(station: int, year: int):
             )
 
             SELECT hexbins.gid as hex_id,
-                SUM(a.count) as count
+                COUNT(a) as count
             FROM a, hexbins
             WHERE
                 (a.id = %s and a.year = %s)
